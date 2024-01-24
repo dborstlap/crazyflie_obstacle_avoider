@@ -1,5 +1,13 @@
-# Ignore the cache folder
+# Ignore all cache folders
 cache/
+**/cache/
 
-# Ignore Python bytecode cache
+# Ignore all __pycache__ folders
 __pycache__/
+**/__pycache__/
+
+# Ignore everything in the datasets folder
+data/datasets/*
+
+# Ignore everything in the datasets folder
+models/trained_models/*
