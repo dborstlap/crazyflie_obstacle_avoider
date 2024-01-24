@@ -11,3 +11,4 @@ data/datasets/*
 
 # Ignore everything in the datasets folder
 models/trained_models/*
+
