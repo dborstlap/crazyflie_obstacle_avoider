@@ -1,8 +1,12 @@
+
+# imports
 import cv2
 import numpy as np
 import pickle
 import os
 
+
+# image operations
 def horizontal_flip(image):
     # Horizontally flip the image
     flipped_image = cv2.flip(image, 1)
@@ -35,64 +39,54 @@ def rotate(image, angle):
 #     return translated_image
 
 def brightness_shift(image, intensity):
-    # Add or subtract intensity from the image
-    image_shifted = image + intensity
-    image_shifted = np.clip(image, 0, 255)
+    # Change brightness by a certain factor
+    image_shifted = image * intensity
+    image_shifted = np.clip(image_shifted, 0, 1)
     return image_shifted
 
 
-def apply_data_augmentation(image, label, num_augmentations):
-    # Apply data augmentation to the image and label
-    augmented_images = []
-    augmented_labels = []
+def apply_data_augmentation(image, label):
 
-    for _ in range(num_augmentations):
+    # Randomly flip the image horizontally
+    flip = np.random.choice([0, 1])
+    if flip == 0:
+        augmented_image = image
+    else:
+        augmented_image = horizontal_flip(image)
 
-        # Randomly flip the image horizontally
-        flip = np.random.choice([0, 1])
-        if flip == 0:
-            augmented_image = image
+    # Randomly shear the image horizontally or vertically
+    shear = np.random.choice([-0.05, 0.05, -0.1, 0.1])
+    if shear != 0:
+        if shear > 0:
+            augmented_image = shear_x(augmented_image, shear)
         else:
-            augmented_image = horizontal_flip(image)
+            augmented_image = shear_y(augmented_image, shear)
 
-        # Randomly shear the image horizontally or vertically
-        shear = np.random.choice([-0.05, 0.05, -0.1, 0.1])
-        if shear != 0:
-            if shear > 0:
-                augmented_image = shear_x(augmented_image, shear)
-            else:
-                augmented_image = shear_y(augmented_image, shear)
+    # Randomly rotate the image
+    rotate_angle = np.random.choice([-5, 5, -10, 10])
+    if rotate_angle:
+        augmented_image = rotate(augmented_image, rotate_angle)
 
-        # Randomly rotate the image
-        rotate_angle = np.random.choice([-5, 5, -10, 10])
-        if rotate_angle:
-            augmented_image = rotate(augmented_image, rotate_angle)
+    # Randomly translate the image horizontally and vertically
+    # translate_offset_x = np.random.choice([-5, 5])
+    # translate_offset_y = np.random.choice([-5, 5])
+    # augmented_image = translate(augmented_image, translate_offset_x, translate_offset_y)
 
-        # Randomly translate the image horizontally and vertically
-        # translate_offset_x = np.random.choice([-5, 5])
-        # translate_offset_y = np.random.choice([-5, 5])
-        # augmented_image = translate(augmented_image, translate_offset_x, translate_offset_y)
+    # Randomly adjust the brightness of the image
+    brightness_offset = np.random.uniform(1-0.5, 1+0.5)
+    augmented_image = brightness_shift(augmented_image, brightness_offset)
 
-        # Randomly adjust the brightness of the image
-        brightness_offset = np.random.randint(-50, 51)
-        augmented_image = brightness_shift(augmented_image, brightness_offset)
-        
-        # If the image is flipped vertically, reverse the label
-        if flip == 1:
-            if label == -1: # left
-                augmented_label = 1 # right
-            elif label == 1: # right
-                augmented_label = -1 # left
-            elif label == 0: # forward
-                augmented_label = 0 # forward
-        else:
-            augmented_label = label
+    # normalize
+    augmented_image = augmented_image
 
-        # store the augmented image and labels in array
-        augmented_images.append(augmented_image)
-        augmented_labels.append(augmented_label)
+    # If the image is flipped vertically, reverse the label
+    if flip == 1:
+        label['steer'] = -label['steer']
 
-    return augmented_images, augmented_labels
+    new_brightness = augmented_image.mean()
+    label['brightness'] = new_brightness
+
+    return augmented_image, label
 
 
 
@@ -103,13 +97,25 @@ def augment_all_data(images, labels, num_augmentations):
 
     # Iterate over the images and labels
     for image, label in zip(images, labels):
-        
-        # Apply data augmentation to the image and label
-        augmented_image, augmented_label = apply_data_augmentation(image, label, num_augmentations)
+            
+            for _ in range(num_augmentations):
+                
+                # very important to make copy, otherwise it recursively changes images and labels defined in iterations before on same image
+                image1 = image.copy()
+                label1 = label.copy()
 
-        # Extend the augmented images and labels lists
-        augmented_images.extend(augmented_image)
-        augmented_labels.extend(augmented_label)
+                # Apply data augmentation to the image and label
+                augmented_image, augmented_label = apply_data_augmentation(image1, label1)
+
+                # Extend the augmented images and labels lists
+                augmented_images.append(augmented_image)
+                augmented_labels.append(augmented_label)
+
+                # print(augmented_labels[-1]["brightness"])
+                # print(augmented_label["brightness"])
+
+    # for label in augmented_labels:
+    #     print(label["brightness"])
 
     # Create a dictionary to store the augmented data
     augmented_data = {
@@ -120,37 +126,31 @@ def augment_all_data(images, labels, num_augmentations):
     return augmented_data
 
 
-
 if __name__ == "__main__":
 
-    # folder name containing data
-    folder = 'cyberzoo_set1'
+    for i in range(3):
+        folder = 'cyberzoo_set'+str(i+1)
 
-    # Get the directory where the script is located
-    script_dir = os.path.abspath(os.path.dirname(__file__))
+        # Get the directory where the script is located
+        script_dir = os.path.abspath(os.path.dirname(__file__))
 
-    # Specify the filename of the pickle file
-    filename = os.path.join(script_dir, '..', 'data/datasets', folder+'.pickle')
+        # Specify the filename of the pickle file
+        filename = os.path.join(script_dir, '..', 'data/datasets', folder+'.pickle')
 
-    with open(filename, "rb") as f:
-        data = pickle.load(f)
+        with open(filename, "rb") as f:
+            data = pickle.load(f)
 
-    images = data['images']
-    labels = data['labels']
+        images = data['images']
+        labels = data['labels']
 
+        augmented_data = augment_all_data(images, labels, num_augmentations=10)
 
-    augmented_data = augment_all_data(images, labels, num_augmentations=10)
-
-    # print(type(augmented_data))
-    # print(type(augmented_data[2]))
-    # print(augmented_data[2])
-
-    # Save the augmented data to a pickle file
-    folder_path = os.path.join(script_dir, '..', 'data/datasets', folder)
-    dumpname = f"{folder_path}_augmented.pickle"
-    with open(dumpname, "wb") as f:
-        pickle.dump(augmented_data, f, pickle.HIGHEST_PROTOCOL)
-    print('Dumped pickle at', dumpname)
+        # Save the augmented data to a pickle file
+        folder_path = os.path.join(script_dir, '..', 'data/datasets', folder)
+        dumpname = f"{folder_path}_augmented.pickle"
+        with open(dumpname, "wb") as f:
+            pickle.dump(augmented_data, f, pickle.HIGHEST_PROTOCOL)
+        print('Dumped pickle at', dumpname)
 
 
 

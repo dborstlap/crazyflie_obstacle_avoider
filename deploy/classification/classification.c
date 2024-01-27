@@ -51,7 +51,7 @@ static pi_task_t task2;
 static unsigned char *cameraBuffer;
 // static unsigned char *imageDemosaiced;
 // static signed char *imageCropped;
-static signed short *Output_1;
+static float *Output_1;
 static struct pi_device camera;
 static struct pi_device cluster_dev;
 static struct pi_cluster_task *task;
@@ -76,14 +76,17 @@ static void cam_handler(void *arg)
   /* Run inference */
   pi_cluster_send_task_to_cl(&cluster_dev, task);
 
-  if (Output_1[0] > Output_1[1])
-  {
-    cpxPrintToConsole(LOG_TO_CRTP, "Packet,     confidence: %hd\n", Output_1[0] - Output_1[1]);
-  }
-  else
-  {
-    cpxPrintToConsole(LOG_TO_CRTP, "Background, confidence: %hd\n", Output_1[1] - Output_1[0]);
-  }
+  // if (Output_1[0] > Output_1[1])
+  // {
+  //   cpxPrintToConsole(LOG_TO_CRTP, "Packet,     confidence: %hd\n", Output_1[0] - Output_1[1]);
+  // }
+  // else
+  // {
+  //   cpxPrintToConsole(LOG_TO_CRTP, "Background, confidence: %hd\n", Output_1[1] - Output_1[0]);
+  // }
+
+  cpxPrintToConsole(LOG_TO_CRTP, "Brightness prediction: %hd\n", Output_1[0]);
+  
 
   pi_camera_capture_async(&camera, cameraBuffer, CAM_WIDTH * CAM_HEIGHT, pi_task_callback(&task1, cam_handler, NULL));
   pi_camera_control(&camera, PI_CAMERA_CMD_START, 0);
