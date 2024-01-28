@@ -12,7 +12,7 @@
         "${workspaceFolder}:/module",
         "aideck-with-autotiler",
         "deploy/make-example",
-        "deploy/vision",
+        "deploy/classification",
         "clean",
         "model",
         "build",
