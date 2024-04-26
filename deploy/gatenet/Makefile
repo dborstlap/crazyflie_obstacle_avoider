@@ -18,8 +18,7 @@ PMSIS_OS = freertos
 APP_CFLAGS += -DMODEL_QUANTIZED
 
 # load the model pre-quantized by TensorFlow
-# if set to false, will quantize using images from he /samples folder
-
+# if set to false, will quantize using images from the /samples folder
 MODEL_PREQUANTIZED = true
 
 ifeq "$(MODEL_PREQUANTIZED)" "true"
@@ -28,6 +27,7 @@ ifeq "$(MODEL_PREQUANTIZED)" "true"
 else
   NNTOOL_SCRIPT=model/nntool_script_q
 endif
+
 QUANT_BITS=8
 BUILD_DIR=BUILD
 MODEL_SQ8=1

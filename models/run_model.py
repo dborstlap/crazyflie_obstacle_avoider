@@ -39,7 +39,6 @@ def run_model(model_path, image):
 
     cv2.imshow('out',image)
     cv2.waitKey(0)
-        
       
 
 
@@ -47,6 +46,8 @@ if __name__ == '__main__':
     # define model and image folders
     model_dir = "models/trained_models/model_brightness_q_small2.tflite"
     image_dir = "data/datasets/cyberzoo_set1"
+
+    
 
 
     for filename in os.listdir(image_dir):
