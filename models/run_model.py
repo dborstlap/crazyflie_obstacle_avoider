@@ -47,8 +47,6 @@ if __name__ == '__main__':
     model_dir = "models/trained_models/model_brightness_q_small2.tflite"
     image_dir = "data/datasets/cyberzoo_set1"
 
-    
-
 
     for filename in os.listdir(image_dir):
         if filename.lower().endswith(('.png', '.jpg', '.jpeg')):

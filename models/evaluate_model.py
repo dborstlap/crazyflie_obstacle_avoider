@@ -11,6 +11,17 @@ from neural_nets.model2 import model2
 from data.get_training_data import get_data, data_files
 
 
+def check_output_type(model_path):
+    # Load TFLite model and allocate tensors.
+    interpreter = tf.lite.Interpreter(model_path=model_path)
+    interpreter.allocate_tensors()
+
+    # Get output tensor details
+    output_details = interpreter.get_output_details()
+    print(output_details[0]['dtype'])  # Prints the data type of the first output tensor
+
+
+
 
 def run_inference(interpreter, test_data):
     interpreter.allocate_tensors()
@@ -35,12 +46,16 @@ def run_inference(interpreter, test_data):
 if __name__ == '__main__':
 
     # name of the trained model
-    trained_model_file = 'model1_quantized.tflite'
+    trained_model_file = 'model_brightness_q_small2.tflite'
 
     # Get the directory where the file is located
     script_dir = os.path.abspath(os.path.dirname(__file__))
     modeldir = os.path.join(script_dir, '..', 'models/trained_models', trained_model_file)
 
+    check_output_type(modeldir)
+
+
+    """
     # Load the trained model
     # model = tf.keras.models.load_model(modeldir)
 
@@ -63,3 +78,4 @@ if __name__ == '__main__':
     # test_acc = score[1]
     # print('Test loss:', test_loss)
     # print('Test accuracy:', test_acc)
+    """
