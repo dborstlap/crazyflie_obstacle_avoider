@@ -61,9 +61,9 @@
  /gap_sdk/rtos/freeRTOS/vendors/gwt/gap8/pmsis/include/pmsis/targets/periph/cluster/cluster_event_unit/cluster_event_unit_regmap.h \
  /gap_sdk/rtos/freeRTOS/vendors/gwt/gap8/pmsis/include/cores/TARGET_RISCV_32/core_gap_cluster.h \
  /gap_sdk/rtos/freeRTOS/vendors/gwt/gap8/pmsis/include/cores/TARGET_RISCV_32/core_utils.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/errno.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/device.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/pmsis_types.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/errno.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/device.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/pmsis_types.h \
  /usr/lib/gap_riscv_toolchain/riscv32-unknown-elf/sys-include/sys/types.h \
  /usr/lib/gap_riscv_toolchain/riscv32-unknown-elf/sys-include/_ansi.h \
  /usr/lib/gap_riscv_toolchain/riscv32-unknown-elf/sys-include/sys/cdefs.h \
@@ -79,7 +79,7 @@
  /usr/lib/gap_riscv_toolchain/riscv32-unknown-elf/sys-include/sys/_timespec.h \
  /usr/lib/gap_riscv_toolchain/riscv32-unknown-elf/sys-include/sys/_pthreadtypes.h \
  /usr/lib/gap_riscv_toolchain/riscv32-unknown-elf/sys-include/machine/types.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/task.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/task.h \
  /gap_sdk/rtos/freeRTOS/vendors/gwt/pmsis/include/pmsis_types.h \
  /gap_sdk/rtos/freeRTOS/demos/gwt/config/gap8/FreeRTOS_util.h \
  /gap_sdk/rtos/freeRTOS/freertos_kernel/include/FreeRTOS.h \
@@ -105,19 +105,19 @@
  /usr/lib/gap_riscv_toolchain/riscv32-unknown-elf/sys-include/sys/reent.h \
  /usr/lib/gap_riscv_toolchain/riscv32-unknown-elf/sys-include/sys/stdio.h \
  /gap_sdk/rtos/freeRTOS/vendors/gwt/libs/printf/printf.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/rtos/rtos.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/rtos/malloc/pi_malloc.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/rtos/malloc/fc_l1_malloc.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/rtos/malloc/malloc_internal.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/rtos/malloc/cl_l1_malloc.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/rtos/malloc/l2_malloc.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/rtos/os_frontend_api/os.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/rtos/os_frontend_api/freq.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/rtos/os_frontend_api/pmsis_time.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/rtos/event_kernel/event_kernel.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/rtos/pi_log.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/rtos/assert.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/mem_slab.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/rtos/rtos.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/rtos/malloc/pi_malloc.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/rtos/malloc/fc_l1_malloc.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/rtos/malloc/malloc_internal.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/rtos/malloc/cl_l1_malloc.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/rtos/malloc/l2_malloc.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/rtos/os_frontend_api/os.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/rtos/os_frontend_api/freq.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/rtos/os_frontend_api/pmsis_time.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/rtos/event_kernel/event_kernel.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/rtos/pi_log.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/rtos/assert.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/mem_slab.h \
  /gap_sdk/rtos/freeRTOS/vendors/gwt/gap8/pmsis/include/pmsis/implem/debug.h \
  /gap_sdk/rtos/freeRTOS/vendors/gwt/gap8/pmsis/include/pmsis/implem/drivers/drivers_data.h \
  /gap_sdk/rtos/freeRTOS/vendors/gwt/gap8/pmsis/include/pmsis/implem/hal/hal.h \
@@ -150,26 +150,27 @@
  /gap_sdk/rtos/freeRTOS/vendors/gwt/gap8/pmsis/include/pmsis/implem/hal/cluster/cluster_icache_ctrl.h \
  /gap_sdk/rtos/freeRTOS/vendors/gwt/gap8/pmsis/include/pmsis/implem/hal/dma/dma.h \
  /gap_sdk/rtos/freeRTOS/vendors/gwt/gap8/pmsis/include/pmsis/implem/drivers/drivers.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/chips/gap8/perf.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/chips/gap8/pad.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/chips/gap8/gpio.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/chips/gap8/pmu.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/drivers/cpi.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/drivers/dmacpy.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/drivers/gpio.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/drivers/pad.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/drivers/hyperbus.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/drivers/i2c.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/drivers/i2s.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/drivers/perf.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/drivers/pmu.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/drivers/pwm.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/drivers/rtc.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/chips/gap8/perf.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/chips/gap8/pad.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/chips/gap8/gpio.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/chips/gap8/pmu.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/chips/gap8/timer.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/drivers/cpi.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/drivers/dmacpy.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/drivers/gpio.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/drivers/pad.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/drivers/hyperbus.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/drivers/i2c.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/drivers/i2s.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/drivers/perf.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/drivers/pmu.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/drivers/pwm.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/drivers/rtc.h \
  /usr/lib/gap_riscv_toolchain/riscv32-unknown-elf/sys-include/time.h \
  /usr/lib/gap_riscv_toolchain/riscv32-unknown-elf/sys-include/machine/time.h \
  /usr/lib/gap_riscv_toolchain/riscv32-unknown-elf/sys-include/sys/_locale.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/drivers/spi.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/drivers/uart.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/drivers/spi.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/drivers/uart.h \
  /gap_sdk/rtos/freeRTOS/vendors/gwt/gap8/pmsis/include/pmsis/implem/drivers/fc_event/fc_event.h \
  /gap_sdk/rtos/freeRTOS/vendors/gwt/gap8/pmsis/include/pmsis/implem/drivers/fll/fll.h \
  /gap_sdk/rtos/freeRTOS/vendors/gwt/gap8/pmsis/include/pmsis/implem/drivers/perf/perf.h \
@@ -196,15 +197,15 @@
  /gap_sdk/rtos/freeRTOS/vendors/gwt/gap8/pmsis/include/cores/TARGET_RISCV_32/pmsis_gcc.h \
  /gap_sdk/rtos/freeRTOS/vendors/gwt/pmsis/include/pmsis/backend/pmsis_backend_native_types.h \
  /gap_sdk/rtos/freeRTOS/vendors/gwt/gap8/pmsis/include/pmsis/implem/cluster/cluster.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/cluster/cl_malloc.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/cluster/cl_pmsis_api.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/cluster/cl_pmsis_types.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/cluster/cluster_sync/cl_synchronisation.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/cluster/cl_pmsis_types.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/cluster/cluster_sync/fc_to_cl_delegate.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/cluster/cluster_sync/cl_to_fc_delegate.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/cluster/cluster_team/cl_team.h \
- /gap_sdk/rtos/pmsis/pmsis_api/include/pmsis/cluster/dma/cl_dma.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/cluster/cl_malloc.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/cluster/cl_pmsis_api.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/cluster/cl_pmsis_types.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/cluster/cluster_sync/cl_synchronisation.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/cluster/cl_pmsis_types.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/cluster/cluster_sync/fc_to_cl_delegate.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/cluster/cluster_sync/cl_to_fc_delegate.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/cluster/cluster_team/cl_team.h \
+ /gap_sdk/rtos/pmsis/api/include/pmsis/cluster/dma/cl_dma.h \
  /gap_sdk/rtos/freeRTOS/vendors/gwt/gap8/pmsis/include/pmsis/implem/cluster/cluster_data.h \
  /gap_sdk/rtos/freeRTOS/vendors/gwt/gap8/pmsis/include/pmsis/implem/cluster/team/cl_team_internal.h \
  /gap_sdk/rtos/freeRTOS/vendors/gwt/gap8/pmsis/include/pmsis/implem/cluster/delegate/uart/uart_cl_internal.h \

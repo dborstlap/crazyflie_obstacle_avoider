@@ -16,7 +16,7 @@ void classificationModel(unsigned int L1Memory, unsigned int L2Memory, unsigned 
     // SetKernelOpts(KER_OPT_NONE, KER_OPT_BUFFER_PROMOTE);
     SetSymbolDynamics();
 
-    SetUsedFilesNames(0, 2, "CNN_BasicKernels_SQ8.h", "classification.h");
+    SetUsedFilesNames(0, 3, "Gap.h", "classification.h", "CNN_BasicKernels_SQ8.h");
     SetGeneratedFilesNames("classificationKernels.c", "classificationKernels.h");
 
 
@@ -31,25 +31,28 @@ void classificationModel(unsigned int L1Memory, unsigned int L2Memory, unsigned 
 
 
     // generator for CONV_2D_0_4_fusion
-    CNN_ConvolutionPoolAct_SQ8("S3_Conv2d_16x1x3x3_MaxPool_2x2_Relu", 0, 4, 1,
+    CNN_ConvolutionPoolAct_SQ8("S3_Conv2d_16x1x3x3_MaxPool_2x2_Relu", 0,
+                               4, 1,
                                1, 16, 324, 244,
                                KOP_CONV, 3, 3, 1, 1, 1, 1, 1,
                                KOP_MAXPOOL, 2, 2, 1, 1, 2, 2, 0,
                                KOP_RELU);
     
     // generator for CONV_2D_0_10_fusion
-    CNN_ConvolutionPoolAct_SQ8("S6_Conv2d_32x16x3x3_MaxPool_2x2_Relu", 0, 4, 1,
+    CNN_ConvolutionPoolAct_SQ8("S6_Conv2d_32x16x3x3_MaxPool_2x2_Relu", 0,
+                               4, 1,
                                16, 32, 162, 122,
                                KOP_CONV, 3, 3, 1, 1, 1, 1, 1,
                                KOP_MAXPOOL, 2, 2, 1, 1, 2, 2, 0,
                                KOP_RELU);
     
     // generator for CONV_2D_0_16_fusion
-    CNN_ConvolutionPoolAct_SQ8("S9_Conv2d_64x32x3x3_MaxPool_2x2_Relu", 0, 4, 1,
+    CNN_ConvolutionPoolAct_SQ8("S9_Conv2d_64x32x3x3_MaxPool_2x2_Relu", 0,
+                               4, 1,
                                32, 64, 81, 61,
                                KOP_CONV, 3, 3, 1, 1, 1, 1, 1,
                                KOP_MAXPOOL, 2, 2, 1, 1, 2, 2, 0,
-                               KOP_RELU);
+                               KOP_RELUM);
     
     // generator for FULLY_CONNECTED_0_23_fusion
     CNN_LinearAct_SQ8("S12_Op_FULLY_CONNECTED_0_23_fusion", 0,
@@ -68,25 +71,25 @@ void classificationModel(unsigned int L1Memory, unsigned int L2Memory, unsigned 
                 TCArgInfo("signed int * __restrict__", "Sequentialquant_conv2dbiasaddr", ARG_SCOPE_GLOBAL, ARG_DIR_CONSTIN, AT_MEM_L3_HFLASH, AT_MEM_UNDEF, ConstInfo("BUILD_MODEL_SQ8BIT/tensors/Sequentialquant_conv2dbiasaddr.tensor", 1, 1, 32, 0)),
                 TCArgInfo("unsigned char * __restrict__", "S3_Mul_scale", ARG_SCOPE_GLOBAL, ARG_DIR_CONSTIN, AT_MEM_L3_HFLASH, AT_MEM_UNDEF, ConstInfo("BUILD_MODEL_SQ8BIT/tensors/S3_Mul_scale.tensor", 1, 1, 8, 0)),
                 TCArgInfo("signed char * __restrict__", "S3_Mul_shift", ARG_SCOPE_GLOBAL, ARG_DIR_CONSTIN, AT_MEM_L3_HFLASH, AT_MEM_UNDEF, ConstInfo("BUILD_MODEL_SQ8BIT/tensors/S3_Mul_shift.tensor", 1, 1, 8, 0)),
-                // BiasQ: 0all 0
+                // in: 0.00787 out: 0.00787  actscale: [1] actscalen: [0] a0: [0] b0: 0 c0: 0 BIASN: 0 PRENORM: 0
                 TCArgInfo("signed char * __restrict__", "S3_Infos", ARG_SCOPE_GLOBAL, ARG_DIR_CONSTIN, AT_MEM_L3_HFLASH, AT_MEM_UNDEF, ConstInfo("BUILD_MODEL_SQ8BIT/tensors/S3_Infos.tensor", 1, 1, 8, 0)),
                 TCArgInfo("signed char * __restrict__", "Dequantize_0_9", ARG_SCOPE_GLOBAL, ARG_DIR_CONSTIN, AT_MEM_L3_HFLASH, AT_MEM_UNDEF, ConstInfo("BUILD_MODEL_SQ8BIT/tensors/Dequantize_0_9.tensor", 1, 1, 8, 0)),
                 TCArgInfo("signed int * __restrict__", "Sequentialquant_conv2d_1biasad", ARG_SCOPE_GLOBAL, ARG_DIR_CONSTIN, AT_MEM_L3_HFLASH, AT_MEM_UNDEF, ConstInfo("BUILD_MODEL_SQ8BIT/tensors/Sequentialquant_conv2d_1biasad.tensor", 1, 1, 32, 0)),
                 TCArgInfo("unsigned char * __restrict__", "S6_Mul_scale", ARG_SCOPE_GLOBAL, ARG_DIR_CONSTIN, AT_MEM_L3_HFLASH, AT_MEM_UNDEF, ConstInfo("BUILD_MODEL_SQ8BIT/tensors/S6_Mul_scale.tensor", 1, 1, 8, 0)),
                 TCArgInfo("signed char * __restrict__", "S6_Mul_shift", ARG_SCOPE_GLOBAL, ARG_DIR_CONSTIN, AT_MEM_L3_HFLASH, AT_MEM_UNDEF, ConstInfo("BUILD_MODEL_SQ8BIT/tensors/S6_Mul_shift.tensor", 1, 1, 8, 0)),
-                // BiasQ: 0all 0
+                // in: 0.00787 out: 0.00787  actscale: [1] actscalen: [0] a0: [0] b0: 0 c0: 0 BIASN: 0 PRENORM: 0
                 TCArgInfo("signed char * __restrict__", "S6_Infos", ARG_SCOPE_GLOBAL, ARG_DIR_CONSTIN, AT_MEM_L3_HFLASH, AT_MEM_UNDEF, ConstInfo("BUILD_MODEL_SQ8BIT/tensors/S6_Infos.tensor", 1, 1, 8, 0)),
                 TCArgInfo("signed char * __restrict__", "Dequantize_0_15", ARG_SCOPE_GLOBAL, ARG_DIR_CONSTIN, AT_MEM_L3_HFLASH, AT_MEM_UNDEF, ConstInfo("BUILD_MODEL_SQ8BIT/tensors/Dequantize_0_15.tensor", 1, 1, 8, 0)),
                 TCArgInfo("signed int * __restrict__", "Sequentialquant_conv2d_2biasad", ARG_SCOPE_GLOBAL, ARG_DIR_CONSTIN, AT_MEM_L3_HFLASH, AT_MEM_UNDEF, ConstInfo("BUILD_MODEL_SQ8BIT/tensors/Sequentialquant_conv2d_2biasad.tensor", 1, 1, 32, 0)),
                 TCArgInfo("unsigned char * __restrict__", "S9_Mul_scale", ARG_SCOPE_GLOBAL, ARG_DIR_CONSTIN, AT_MEM_L3_HFLASH, AT_MEM_UNDEF, ConstInfo("BUILD_MODEL_SQ8BIT/tensors/S9_Mul_scale.tensor", 1, 1, 8, 0)),
                 TCArgInfo("signed char * __restrict__", "S9_Mul_shift", ARG_SCOPE_GLOBAL, ARG_DIR_CONSTIN, AT_MEM_L3_HFLASH, AT_MEM_UNDEF, ConstInfo("BUILD_MODEL_SQ8BIT/tensors/S9_Mul_shift.tensor", 1, 1, 8, 0)),
-                // BiasQ: 0all 0
+                // in: 0.00392 out: 0.00392  actscale: [1] actscalen: [0] a0: [-128] b0: 0 c0: 0 BIASN: 0 PRENORM: 0
                 TCArgInfo("signed char * __restrict__", "S9_Infos", ARG_SCOPE_GLOBAL, ARG_DIR_CONSTIN, AT_MEM_L3_HFLASH, AT_MEM_UNDEF, ConstInfo("BUILD_MODEL_SQ8BIT/tensors/S9_Infos.tensor", 1, 1, 8, 0)),
                 TCArgInfo("signed char * __restrict__", "Dequantize_0_22", ARG_SCOPE_GLOBAL, ARG_DIR_CONSTIN, AT_MEM_L3_HFLASH, AT_MEM_UNDEF, ConstInfo("BUILD_MODEL_SQ8BIT/tensors/Dequantize_0_22.tensor", 1, 1, 8, 0)),
                 TCArgInfo("signed int * __restrict__", "Sequentialquant_densebiasaddre", ARG_SCOPE_GLOBAL, ARG_DIR_CONSTIN, AT_MEM_L3_HFLASH, AT_MEM_UNDEF, ConstInfo("BUILD_MODEL_SQ8BIT/tensors/Sequentialquant_densebiasaddre.tensor", 1, 1, 32, 0)),
                 TCArgInfo("unsigned char * __restrict__", "S12_Mul_scale", ARG_SCOPE_GLOBAL, ARG_DIR_CONSTIN, AT_MEM_L3_HFLASH, AT_MEM_UNDEF, ConstInfo("BUILD_MODEL_SQ8BIT/tensors/S12_Mul_scale.tensor", 1, 1, 8, 0)),
                 TCArgInfo("signed char * __restrict__", "S12_Mul_shift", ARG_SCOPE_GLOBAL, ARG_DIR_CONSTIN, AT_MEM_L3_HFLASH, AT_MEM_UNDEF, ConstInfo("BUILD_MODEL_SQ8BIT/tensors/S12_Mul_shift.tensor", 1, 1, 8, 0)),
-                // BiasQ: 0all 0
+                // in: 0.00787 out: 0.00787  actscale: [1] actscalen: [0] a0: [0] b0: 0 c0: 0 BIASN: 0 PRENORM: 0
                 TCArgInfo("signed char * __restrict__", "S12_Infos", ARG_SCOPE_GLOBAL, ARG_DIR_CONSTIN, AT_MEM_L3_HFLASH, AT_MEM_UNDEF, ConstInfo("BUILD_MODEL_SQ8BIT/tensors/S12_Infos.tensor", 1, 1, 8, 0)),
                 TCArgInfo("signed char * __restrict__", "Output_1", ARG_SCOPE_ARG, ARG_DIR_OUT, AT_MEM_L2, AT_MEM_L2, 0)
             ),
@@ -101,7 +104,7 @@ void classificationModel(unsigned int L1Memory, unsigned int L2Memory, unsigned 
     /* Stacked tensors - Concats */
     // no concats in graph so not stacked tensors created
 
-    // Node S3_Conv2d_16x1x3x3_MaxPool_2x2_Relu inq -1.01<(i8-0.00)*0.00787402<1.00 forced weightsq chan<(i8-0.00)*chan<chan outq -1.01<(i8-0.00)*0.00787402<1.00 biasesq chan<(i32-0.00)*chan<chan
+    // Node S3_Conv2d_16x1x3x3_MaxPool_2x2_Relu inq -1.01<(i8-0.00)*0.00787402<1.00 forced weightsq chan<(i8-0.00)*chan<chan outq -1.01<(i8-0.00)*0.00787402<1.00 forced biasesq chan<(i32-0.00)*chan<chan
     AddNode("S3_Conv2d_16x1x3x3_MaxPool_2x2_Relu",
         Bindings(7,
             GNodeArg(GNA_IN, "Input_1", 0),
@@ -113,7 +116,7 @@ void classificationModel(unsigned int L1Memory, unsigned int L2Memory, unsigned 
             GNodeArg(GNA_IN, "S3_Infos", 0)
         )
     );
-    // Node S6_Conv2d_32x16x3x3_MaxPool_2x2_Relu inq -1.01<(i8-0.00)*0.00787402<1.00 forced weightsq chan<(i8-0.00)*chan<chan outq -1.01<(i8-0.00)*0.00787402<1.00 biasesq chan<(i32-0.00)*chan<chan
+    // Node S6_Conv2d_32x16x3x3_MaxPool_2x2_Relu inq -1.01<(i8-0.00)*0.00787402<1.00 forced weightsq chan<(i8-0.00)*chan<chan outq -1.01<(i8-0.00)*0.00787402<1.00 forced biasesq chan<(i32-0.00)*chan<chan
     AddNode("S6_Conv2d_32x16x3x3_MaxPool_2x2_Relu",
         Bindings(7,
             GNodeArg(GNA_IN, "S3_Output", 0),
@@ -125,7 +128,7 @@ void classificationModel(unsigned int L1Memory, unsigned int L2Memory, unsigned 
             GNodeArg(GNA_IN, "S6_Infos", 0)
         )
     );
-    // Node S9_Conv2d_64x32x3x3_MaxPool_2x2_Relu inq -1.01<(i8-0.00)*0.00787402<1.00 forced weightsq chan<(i8-0.00)*chan<chan outq -1.01<(i8-0.00)*0.00787402<1.00 biasesq chan<(i32-0.00)*chan<chan
+    // Node S9_Conv2d_64x32x3x3_MaxPool_2x2_Relu inq -1.01<(i8-0.00)*0.00787402<1.00 forced weightsq chan<(i8-0.00)*chan<chan outq 0.00<(i8--128.00)*0.00392157<1.00 biasesq chan<(i32-0.00)*chan<chan
     AddNode("S9_Conv2d_64x32x3x3_MaxPool_2x2_Relu",
         Bindings(7,
             GNodeArg(GNA_IN, "S6_Output", 0),
@@ -137,7 +140,7 @@ void classificationModel(unsigned int L1Memory, unsigned int L2Memory, unsigned 
             GNodeArg(GNA_IN, "S9_Infos", 0)
         )
     );
-    // Node FULLY_CONNECTED_0_23 inq -1.01<(i8-0.00)*0.00787402<1.00 weightsq -0.11<(i8-0.00)*0.00084110<0.11 outq -1.01<(i8-0.00)*0.00787402<1.00
+    // Node FULLY_CONNECTED_0_23 inq 0.00<(i8--128.00)*0.00392157<1.00 weightsq -0.11<(i8-0.00)*0.00084110<0.11 outq -1.01<(i8-0.00)*0.00787402<1.00 forced
     AddNode("S12_Op_FULLY_CONNECTED_0_23_fusion",
         Bindings(7,
             GNodeArg(GNA_IN, "S9_Output", 0),
@@ -159,7 +162,7 @@ int main(int argc, char **argv)
     if (TilerParseOptions(argc, argv)) {
             printf("Failed to initialize or incorrect output arguments directory.\n"); return 1;
     }
-    classificationModel(64000, 300000, 8000000, 20*1024*1024);
+    classificationModel(64000, 300000, 8000000, 64*1024*1024);
     GenerateTilingCode();
     return 0;
 }
