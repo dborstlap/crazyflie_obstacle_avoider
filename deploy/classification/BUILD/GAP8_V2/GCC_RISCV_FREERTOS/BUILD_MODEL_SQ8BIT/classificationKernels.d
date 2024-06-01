@@ -246,4 +246,5 @@
  /gap_sdk/tools/autotiler_v3/CNN_Libraries_fp16/../DSP_Libraries/FastFloatApprox.h \
  /gap_sdk/tools/autotiler_v3/CNN_Libraries_fp16/../DSP_Libraries/FloatDefines.h \
  /gap_sdk/tools/autotiler_v3/CNN_Libraries_SQ8/CNN_AT_Misc.h \
- /gap_sdk/tools/autotiler_v3/CNN_Libraries_SQ8/CNN_Infos_SQ8.h
+ /gap_sdk/tools/autotiler_v3/CNN_Libraries_SQ8/CNN_Infos_SQ8.h \
+ /gap_sdk/tools/autotiler_v3/Generators/BilinearResizes/ResizeBasicKernels.h

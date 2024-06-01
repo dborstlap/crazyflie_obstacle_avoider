@@ -58,10 +58,28 @@ def parse_args():
     return args.parse_args()
 
 
+
+def load_image(file_path, target_size):
+    image = load_img(file_path, target_size=target_size, color_mode='grayscale')
+    image = img_to_array(image)
+    return image
+
+def custom_data_generator(file_paths, labels, batch_size, target_size):
+    num_samples = len(file_paths)
+    while True:
+        for offset in range(0, num_samples, batch_size):
+            batch_files = file_paths[offset:offset + batch_size]
+            batch_labels = labels[offset:offset + batch_size]
+
+            images = np.array([load_image(file, target_size) for file in batch_files])
+            yield images, np.array(batch_labels)
+
+
+
 if __name__ == "__main__":
     args = parse_args()
     ROOT_PATH = (
-        f"{os.path.abspath(os.curdir)}/GAP8/ai_examples/classification/"
+        f"{os.path.abspath(os.curdir)}/deploy/classification/"
     )
     DATASET_PATH = f"{ROOT_PATH}{args.dataset_path}"
     if not os.path.exists(DATASET_PATH):
@@ -71,31 +89,44 @@ if __name__ == "__main__":
         raise ValueError(f"Dataset path '{DATASET_PATH}' does not exist.")
     print(DATASET_PATH + "/*/*/*")
 
-    train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(
-        rotation_range=10,
-        shear_range=0.2,
-        zoom_range=0.1,
-        horizontal_flip=True,
-        brightness_range=[0.5, 1.5],
-    )
-    train_generator = train_datagen.flow_from_directory(
-        f"{DATASET_PATH}/train",
-        target_size=(args.image_width, args.image_height),
-        batch_size=args.batch_size,
-        class_mode="categorical",
-        color_mode="grayscale",
-    )
+    # train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(
+    #     rotation_range=10,
+    #     shear_range=0.2,
+    #     zoom_range=0.1,
+    #     horizontal_flip=True,
+    #     brightness_range=[0.5, 1.5],
+    # )
+    # train_generator = train_datagen.flow_from_directory(
+    #     f"{DATASET_PATH}/train",
+    #     target_size=(args.image_width, args.image_height),
+    #     batch_size=args.batch_size,
+    #     class_mode=None,
+    #     color_mode="grayscale",
+    # )
+    # val_datagen = tf.keras.preprocessing.image.ImageDataGenerator()
+    # val_generator = val_datagen.flow_from_directory(
+    #     f"{DATASET_PATH}/validation",
+    #     target_size=(args.image_width, args.image_height),
+    #     batch_size=args.batch_size,
+    #     class_mode=None,
+    #     color_mode="grayscale",
+    # )
 
-    val_datagen = tf.keras.preprocessing.image.ImageDataGenerator()
-    val_generator = val_datagen.flow_from_directory(
-        f"{DATASET_PATH}/validation",
-        target_size=(args.image_width, args.image_height),
-        batch_size=args.batch_size,
-        class_mode="categorical",
-        color_mode="grayscale",
-    )
+
+    train_labels_df = pd.read_csv(os.path.join(DATASET_PATH, 'train_labels.csv'))
+    val_labels_df = pd.read_csv(os.path.join(DATASET_PATH, 'validation_labels.csv'))
+
+    train_file_paths = [os.path.join(DATASET_PATH, 'train', fname) for fname in train_labels_df['filename']]
+    train_labels = train_labels_df['label'].values
+
+    val_file_paths = [os.path.join(DATASET_PATH, 'validation', fname) for fname in val_labels_df['filename']]
+    val_labels = val_labels_df['label'].values
+
+    train_generator = custom_data_generator(train_file_paths, train_labels, args.batch_size, (args.image_width, args.image_height))
+    val_generator = custom_data_generator(val_file_paths, val_labels, args.batch_size, (args.image_width, args.image_height))
 
     FIRST_LAYER_STRIDE = 2
+
 
     # Create the base model from the pre-trained MobileNet V2
     base_model = tf.keras.applications.MobileNetV2(
@@ -130,14 +161,14 @@ if __name__ == "__main__":
             ),
             tf.keras.layers.Dropout(0.2),
             tf.keras.layers.GlobalAveragePooling2D(),
-            tf.keras.layers.Dense(units=2, activation="softmax"),
+            tf.keras.layers.Dense(units=1, activation="softmax"),
         ]
     )
 
     model.compile(
         optimizer=tf.keras.optimizers.Adam(1e-5),
-        loss="categorical_crossentropy",
-        metrics=["accuracy"],
+        loss="mean_squared_error",
+        metrics=["mean_absolute_error"],
     )
 
     model.summary()
@@ -167,8 +198,8 @@ if __name__ == "__main__":
 
     model.compile(
         optimizer=tf.keras.optimizers.Adam(5e-5),
-        loss="categorical_crossentropy",
-        metrics=["accuracy"],
+        loss="mean_squared_error",
+        metrics=["mean_absolute_error"],
     )
 
     model.summary()

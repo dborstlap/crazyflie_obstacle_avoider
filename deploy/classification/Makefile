@@ -37,7 +37,7 @@ $(info Building GAP8 mode with $(QUANT_BITS) bit quantization)
 MODEL_SUFFIX = _SQ8BIT
 
 include model_decl.mk
-TRAINED_MODEL=model/model_brightness_q_small2.tflite
+TRAINED_MODEL=model/classification_q.tflite
 
 CLUSTER_STACK_SIZE?=6096
 CLUSTER_SLAVE_STACK_SIZE?=1024

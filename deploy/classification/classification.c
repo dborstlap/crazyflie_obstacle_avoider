@@ -76,8 +76,6 @@ static void cam_handler(void *arg)
   /* Run inference */
   pi_cluster_send_task_to_cl(&cluster_dev, task);
 
-  cpxPrintToConsole(LOG_TO_CRTP, "Packet,     output: %hd\n", Output_1[0]);
-
   if (Output_1[0] > Output_1[1])
   {
     cpxPrintToConsole(LOG_TO_CRTP, "Packet,     confidence: %hd\n", Output_1[0] - Output_1[1]);
