@@ -14,7 +14,7 @@ data_files = [
 ]
 
 
-def get_data(pickle_files, test_size=0.2):
+def get_data(pickle_files): #, test_size=0.2):
     all_images = []
     all_labels = []
 
@@ -34,12 +34,15 @@ def get_data(pickle_files, test_size=0.2):
     # Convert lists to numpy arrays for processing
     all_images = np.array(all_images)
     all_labels = np.array(all_labels)
+    all_labels_array = np.array([[d['brightness'], d['steer']] for d in all_labels])
+
 
     # Split the dataset into training and testing sets
-    data_train, data_test, labels_train, labels_test = train_test_split(all_images, all_labels, test_size=test_size)
+    # data_train, data_test, labels_train, labels_test = train_test_split(all_images, all_labels, test_size=test_size)
 
     # Return the training and validation datasets
-    return data_train, labels_train, data_test, labels_test
+    # return data_train, labels_train, data_test, labels_test
+    return all_images, all_labels_array
 
 
 
