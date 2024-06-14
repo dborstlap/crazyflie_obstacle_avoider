@@ -1,4 +1,6 @@
-
+# TODO check accuracy of newly trained my_classification.tflite model
+# TODO       - make file to run model and print predictions and labels
+# TODO       - check if predictions are in correct range. Did I normalize input data? Dont think so but better to check.
 
 import os
 import numpy as np
@@ -15,54 +17,91 @@ image_width = 324
 image_height = 244
 
 FIRST_LAYER_STRIDE = 2
-epochs = 10
-fine_tune_epochs = 10
+epochs = 200
+# fine_tune_epochs = 10
 
 # path of repository (crazyflie_obstacle_avoider)
 ROOT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 
 # Create the base model from the pre-trained MobileNet V2
-base_model = tf.keras.applications.MobileNetV2(
-    input_shape=(
-        96,
-        96,
-        3,
-    ),
-    include_top=False,
-    weights="imagenet",
-    alpha=0.35,
-)
-base_model.trainable = False
+# base_model = tf.keras.applications.MobileNetV2(
+#     input_shape=(
+#         96,
+#         96,
+#         3,
+#     ),
+#     include_top=False,
+#     weights="imagenet",
+#     alpha=0.35,
+# )
+# base_model.trainable = True
 
-# Add a custom head, which will predict the numerical output!!!!
+# # Add a custom head, which will predict the numerical output!!!!
+# model = tf.keras.Sequential(
+#     [
+#         tf.keras.Input(shape=(image_height, image_width, 1)),
+#         tf.keras.layers.SeparableConvolution2D(
+#             filters=3,
+#             kernel_size=1,
+#             # activation="relu",
+#             activation=None,
+#             strides=FIRST_LAYER_STRIDE,
+#         ),
+#         tf.keras.layers.experimental.preprocessing.Resizing(
+#             96, 96, interpolation="bilinear"
+#         ),
+#         base_model,
+#         tf.keras.layers.SeparableConvolution2D(
+#             filters=32, kernel_size=3, activation="relu"
+#         ),
+#         tf.keras.layers.Dropout(0.2),
+#         tf.keras.layers.GlobalAveragePooling2D(),
+#         tf.keras.layers.Dense(units=2, activation="softmax"),
+#     ]
+# )
+
 model = tf.keras.Sequential(
     [
         tf.keras.Input(shape=(image_height, image_width, 1)),
         tf.keras.layers.SeparableConvolution2D(
-            filters=3,
-            kernel_size=1,
-            # activation="relu",
-            activation=None,
+            filters=16,
+            kernel_size=3,
+            activation='relu',
             strides=FIRST_LAYER_STRIDE,
+            padding='same'
         ),
-        tf.keras.layers.experimental.preprocessing.Resizing(
-            96, 96, interpolation="bilinear"
-        ),
-        base_model,
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+
         tf.keras.layers.SeparableConvolution2D(
-            filters=32, kernel_size=3, activation="relu"
+            filters=32,
+            kernel_size=3,
+            activation='relu',
+            padding='same'
         ),
-        tf.keras.layers.Dropout(0.2),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+
+        tf.keras.layers.SeparableConvolution2D(
+            filters=64,
+            kernel_size=3,
+            activation='relu',
+            padding='same'
+        ),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+
         tf.keras.layers.GlobalAveragePooling2D(),
-        tf.keras.layers.Dense(units=2, activation="softmax"),
+        tf.keras.layers.Dropout(0.3),
+
+        tf.keras.layers.Dense(64, activation='relu'),
+        tf.keras.layers.Dropout(0.3),
+        tf.keras.layers.Dense(3)  # Output layer for regression
     ]
 )
 
-model.compile(
-    optimizer=tf.keras.optimizers.Adam(1e-5),
-    loss="mean_squared_error",
-    metrics=["mae"],
-)
+# model.compile(optimizer=tf.keras.optimizers.Adam(1e-5), loss="mean_squared_error", metrics=["mae"])
+model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mean_absolute_error'])  # mean_absolute_error
 
 model.summary()
 print("Number of trainable weights = {}".format(len(model.trainable_weights)))
@@ -92,38 +131,41 @@ history = model.fit(
     validation_data=(data_test, labels_test)
 )
 
-# Fine-tune the model
-print("Number of layers in the base model: ", len(base_model.layers))
 
-base_model.trainable = True
-fine_tune_at = 100
 
-# Freeze all the layers before the `fine_tune_at` layer
-for layer in base_model.layers[:fine_tune_at]:
-    layer.trainable = False
+##  FINE TUNE the model
+# print("Number of layers in the base model: ", len(base_model.layers))
 
-model.compile(
-    optimizer=tf.keras.optimizers.Adam(1e-5),
-    loss="mean_squared_error",
-    metrics=["mae"],
-)
+# base_model.trainable = True
+# fine_tune_at = 100
 
-model.summary()
+# # Freeze all the layers before the `fine_tune_at` layer
+# for layer in base_model.layers[:fine_tune_at]:
+#     layer.trainable = False
 
-print("Number of trainable weights = {}".format(len(model.trainable_weights)))
+# model.compile(
+#     optimizer=tf.keras.optimizers.Adam(1e-5),
+#     loss="mean_squared_error",
+#     metrics=["mae"],
+# )
 
-history_fine = model.fit(
-    x=data_train,
-    y=labels_train,
-    epochs=fine_tune_epochs,
-    validation_data=(data_test, labels_test)
-)
+# model.summary()
+
+# print("Number of trainable weights = {}".format(len(model.trainable_weights)))
+
+# history_fine = model.fit(
+#     x=data_train,
+#     y=labels_train,
+#     epochs=fine_tune_epochs,
+#     validation_data=(data_test, labels_test)
+# )
 
 # Convert to TensorFlow lite
 converter = tf.lite.TFLiteConverter.from_keras_model(model)
 tflite_model = converter.convert()
 
-with open(f"{ROOT_PATH}/deploy/classification/model/my_classification.tflite", "wb") as f:
+# with open(f"{ROOT_PATH}/deploy/classification/model/my_classification_2outputs.tflite", "wb") as f:
+with open(f"{ROOT_PATH}/deploy/classification/model/my_classification_brightness_distribution.tflite", "wb") as f:
     f.write(tflite_model)
 
 

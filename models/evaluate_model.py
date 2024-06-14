@@ -1,14 +1,15 @@
 # TODO doesnt work yet as intended
+# EVALUATE ACCURACY OF MODEL ...
 
 import tensorflow as tf
 import os
 import sys
 import numpy as np
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from neural_nets.model1 import model1
-from neural_nets.model2 import model2
-from data.get_training_data import get_data, data_files
+# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# from neural_nets.model1 import model1
+# from neural_nets.model2 import model2
+# from data.get_training_data import get_data, data_files
 
 
 def check_output_type(model_path):
@@ -19,7 +20,7 @@ def check_output_type(model_path):
     # Get output tensor details
     output_details = interpreter.get_output_details()
     print(output_details[0]['dtype'])  # Prints the data type of the first output tensor
-
+    # return interpreter
 
 
 
@@ -46,11 +47,11 @@ def run_inference(interpreter, test_data):
 if __name__ == '__main__':
 
     # name of the trained model
-    trained_model_file = 'model_brightness_q_small2.tflite'
+    trained_model_file = 'my_classification.tflite'
 
     # Get the directory where the file is located
     script_dir = os.path.abspath(os.path.dirname(__file__))
-    modeldir = os.path.join(script_dir, '..', 'models/trained_models', trained_model_file)
+    modeldir = os.path.join(script_dir, '..', 'deploy/classification/model', trained_model_file)
 
     check_output_type(modeldir)
 

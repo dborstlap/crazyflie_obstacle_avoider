@@ -7,12 +7,16 @@ import os
 
 
 # list of all .pickle datafiles to be combined
+# data_files = [
+#     'cyberzoo_set1_augmented.pickle',
+#     'cyberzoo_set2_augmented.pickle',
+#     'cyberzoo_set3_augmented.pickle'
+# ]
 data_files = [
-    'cyberzoo_set1_augmented.pickle',
-    'cyberzoo_set2_augmented.pickle',
-    'cyberzoo_set3_augmented.pickle'
+    'cyberzoo_set1.pickle',
+    'cyberzoo_set2.pickle',
+    'cyberzoo_set3.pickle'
 ]
-
 
 def get_data(pickle_files): #, test_size=0.2):
     all_images = []
@@ -34,7 +38,8 @@ def get_data(pickle_files): #, test_size=0.2):
     # Convert lists to numpy arrays for processing
     all_images = np.array(all_images)
     all_labels = np.array(all_labels)
-    all_labels_array = np.array([[d['brightness'], d['steer']] for d in all_labels])
+
+    all_labels_array = np.array([d['brightness_distribution'] for d in all_labels]) #, d['steer']]
 
 
     # Split the dataset into training and testing sets

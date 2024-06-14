@@ -32,7 +32,21 @@ def generate_labels(folder):
                 if label_steer_string == 'right':
                     label_steer = 1
                 if label_steer_string == 'left':
-                    label_steer = -1           
+                    label_steer = -1          
+
+                # compute angle based on brightness
+                # Split the image into 3 vertical strips
+                height, width = img.shape
+                strip_width = width // 3
+                strips = [img[:, i*strip_width:(i+1)*strip_width] for i in range(3)]
+                
+                # Calculate the average brightness of each strip
+                brightness_left = strips[0].mean()
+                brightness_middle = strips[1].mean()
+                brightness_right = strips[2].mean()
+                
+                # Output the brightness values in an array
+                brightness_distribution = [brightness_left, brightness_middle, brightness_right]
 
                 # compute average image brightness. Since greyscale, it is just average value.
                 av_brightness = img.mean()
@@ -40,7 +54,8 @@ def generate_labels(folder):
                 # define labels in label dictionary
                 label = {
                     'steer': label_steer,
-                    'brightness': av_brightness
+                    'brightness': av_brightness,
+                    'brightness_distribution': brightness_distribution
                 }
 
                 # training_data.append((img, label))

@@ -49,11 +49,11 @@ def brightness_shift(image, intensity):
 def apply_data_augmentation(image, label):
 
     # Randomly flip the image horizontally
-    flip = np.random.choice([0, 1])
-    if flip == 0:
-        augmented_image = image
-    else:
-        augmented_image = horizontal_flip(image)
+    # flip = np.random.choice([0, 1])
+    # if flip == 0:
+    #     augmented_image = image
+    # else:
+    #     augmented_image = horizontal_flip(image)
 
     # Randomly shear the image horizontally or vertically
     shear = np.random.choice([-0.05, 0.05, -0.1, 0.1])

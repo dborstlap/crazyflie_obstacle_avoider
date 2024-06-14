@@ -14,10 +14,19 @@ def run_model(model_path, image):
     interpreter.allocate_tensors()
 
     image = image/255.
+    # print(image.mean())
 
-    print(image.mean())
-    # plt.imshow(image_in)
-    # plt.show()
+    height, width = image.shape
+    strip_width = width // 3
+    strips = [image[:, i*strip_width:(i+1)*strip_width] for i in range(3)]
+    
+    # Calculate the average brightness of each strip
+    brightness_left = strips[0].mean()
+    brightness_middle = strips[1].mean()
+    brightness_right = strips[2].mean()
+
+    brightness_distribution = np.round([brightness_left, brightness_middle, brightness_right],3)
+    print(brightness_distribution)
 
     input_details = interpreter.get_input_details()
 
@@ -35,6 +44,7 @@ def run_model(model_path, image):
     # Get the output tensor and post-process if needed
     output_details = interpreter.get_output_details()
     output = interpreter.get_tensor(output_details[0]['index'])
+    output = np.round(output,3)
     print(output)
 
     cv2.imshow('out',image)
@@ -44,8 +54,14 @@ def run_model(model_path, image):
 
 if __name__ == '__main__':
     # define model and image folders
-    model_dir = "models/trained_models/model_brightness_q_small2.tflite"
-    image_dir = "data/datasets/cyberzoo_set1"
+    image_dir = "data/datasets/cyberzoo_set2"
+
+    # name of the trained model
+    trained_model_file = 'my_classification_brightness_distribution.tflite'
+
+    # Get the directory where the file is located
+    script_dir = os.path.abspath(os.path.dirname(__file__))
+    model_dir = os.path.join(script_dir, '..', 'deploy/classification/model', trained_model_file)
 
 
     for filename in os.listdir(image_dir):
