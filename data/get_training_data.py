@@ -15,7 +15,8 @@ import os
 data_files = [
     'cyberzoo_set1.pickle',
     'cyberzoo_set2.pickle',
-    'cyberzoo_set3.pickle'
+    'cyberzoo_set3.pickle',
+    'all_data.pickle',
 ]
 
 def get_data(pickle_files): #, test_size=0.2):
@@ -32,6 +33,7 @@ def get_data(pickle_files): #, test_size=0.2):
         with open(file_dir, 'rb') as f:
             data = pickle.load(f)
             images, labels = data['images'], data['labels']
+
             all_images.extend(images)
             all_labels.extend(labels)
 

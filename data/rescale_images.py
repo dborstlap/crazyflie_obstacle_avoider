@@ -14,7 +14,7 @@ def resize_images(directory):
 
 if __name__ == '__main__':
     script_dir = os.path.abspath(os.path.dirname(__file__))
-    directory = os.path.join(script_dir, 'datasets/cyberzoo_set3')
+    directory = os.path.join(script_dir, 'datasets/all_data')
     resize_images(directory)
 
 

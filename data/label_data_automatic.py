@@ -3,11 +3,9 @@ Generates labelled data based on filename.
 Can only be used if labels are stored as last word of image filenamen (see operate/fly_fpv)
 """
 
-
 import os
 import pickle
 import cv2
-
 
 
 def generate_labels(folder):
@@ -75,8 +73,17 @@ def generate_labels(folder):
 
 if __name__ == '__main__':
     # folder name to store data in
-    for i in range(3):
-        folder = 'cyberzoo_set'+str(i+1)
+
+    folders = [
+        # 'cyberzoo_set1',
+        # 'cyberzoo_set2',
+        # 'cyberzoo_set3',
+        'all_data',
+    ]
+
+    folders
+
+    for folder in folders:
 
         # Folder path relative to the script location
         script_dir = os.path.abspath(os.path.dirname(__file__))
