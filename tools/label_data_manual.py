@@ -1,6 +1,3 @@
-#!!!!
-# TODO Rewrite so that .pickle is dictionary not array!
-#!!!!
 
 """
 images that don't include one of labels in the name have to be labelled by user

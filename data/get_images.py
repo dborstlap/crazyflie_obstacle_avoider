@@ -1,3 +1,22 @@
+# TODO integrate with fly_fpv so it is one file  @yamac
+
+"""
+Functionality:
+- to collect data
+
+How?
+user can specify
+- to just retrieve images via wifi
+- OR to fly the drone and collect images while flying.
+
+User can specify:
+- to visualize the images (live)
+- to store the images
+
+Stored images should be stored in 'image' folder (NOT datasets, this is for labelled datasets)
+Suggestion: in 'images' directory, images should be stored in subdirectories named by the date and time of the flight, or user defined name like 'cyberzoo_test_1'
+"""
+
 
 import argparse
 import time

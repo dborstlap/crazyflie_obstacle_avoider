@@ -1,13 +1,3 @@
-"""
-fly the drone in fpv mode
-
-Follow these steps
-1) connect to drone wifi
-2) 
-3) 
-
-"""
-
 
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -17,7 +7,9 @@ import sys
 import threading
 import os
 import datetime
-
+import argparse
+import time
+import socket
 import numpy as np
 
 import cflib.crtp
@@ -39,7 +31,7 @@ KEY_LABELS = {
     QtCore.Qt.Key_Left: 'left',
     QtCore.Qt.Key_Right: 'right',
     QtCore.Qt.Key_Up: 'forward',
-}
+    }
 
 
 
@@ -164,7 +156,7 @@ class MainWindow(QtWidgets.QWidget):
     def saveImage(self, image, key_pressed):
         
         script_dir = os.path.abspath(os.path.dirname(__file__))
-        save_dir = os.path.join(script_dir, '..', 'data/datasets', self.save_folder)
+        save_dir = os.path.join(script_dir, '..', 'data/images', self.save_folder)
 
         # Ensure the directory exists
         if not os.path.exists(save_dir):
@@ -293,6 +285,9 @@ if __name__ == '__main__':
 
     SAVE_DATA = True
     SAVE_FOLDER = 'cyberzoo_set4'
+
+    # determine if you want to fly drone and control with arrows
+    fly_fpv = True
 
 
     appQt = QtWidgets.QApplication(sys.argv)

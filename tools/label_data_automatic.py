@@ -1,3 +1,6 @@
+# TODO merge with label_data_manual
+# TODO user should be able to specify whether to label data automatically, or one by one and 
+
 """
 Generates labelled data based on filename.
 Can only be used if labels are stored as last word of image filenamen (see operate/fly_fpv)
@@ -20,7 +23,7 @@ def generate_labels(folder):
             if img is not None:
 
                 # normalize
-                img = img/255.
+                img_norm = img / 255.
 
                 # Extract label from filename
                 # Assuming format: img_timestamp_label.png
@@ -34,9 +37,9 @@ def generate_labels(folder):
 
                 # compute angle based on brightness
                 # Split the image into 3 vertical strips
-                height, width = img.shape
+                height, width = img_norm.shape
                 strip_width = width // 3
-                strips = [img[:, i*strip_width:(i+1)*strip_width] for i in range(3)]
+                strips = [img_norm[:, i*strip_width:(i+1)*strip_width] for i in range(3)]
                 
                 # Calculate the average brightness of each strip
                 brightness_left = strips[0].mean()
@@ -47,7 +50,7 @@ def generate_labels(folder):
                 brightness_distribution = [brightness_left, brightness_middle, brightness_right]
 
                 # compute average image brightness. Since greyscale, it is just average value.
-                av_brightness = img.mean()
+                av_brightness = img_norm.mean()
 
                 # define labels in label dictionary
                 label = {
@@ -75,9 +78,9 @@ if __name__ == '__main__':
     # folder name to store data in
 
     folders = [
-        # 'cyberzoo_set1',
-        # 'cyberzoo_set2',
-        # 'cyberzoo_set3',
+        'cyberzoo_set1',
+        'cyberzoo_set2',
+        'cyberzoo_set3',
         'all_data',
     ]
 

@@ -8,6 +8,7 @@ __pycache__/
 
 # Ignore everything in the datasets folder
 data/datasets/*
+data/images/*
 
 # Ignore everything in the datasets folder
 # models/trained_models/*
