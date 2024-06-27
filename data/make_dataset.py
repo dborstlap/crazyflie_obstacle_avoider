@@ -2,7 +2,6 @@
 
 # imports
 import os
-import cv2
 import h5py
 import numpy as np
 import tensorflow as tf
@@ -20,7 +19,7 @@ image_sets = [
 ]
 
 # images will be reshaped to match the desired shape
-resolution = (324, 224)  # Resolution that the image should be
+resolution = (244, 324)  # Resolution that the image should be
 
 
 # ------------------ RETRIEVE DATA ---------------------------

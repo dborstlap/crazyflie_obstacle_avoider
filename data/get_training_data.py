@@ -1,7 +1,6 @@
 
 # imports
 import numpy as np
-from sklearn.model_selection import train_test_split
 import os
 import h5py
 
@@ -29,16 +28,16 @@ def get_data(datasets):
         labels1.extend(labels1_loaded)
 
     # Convert lists to numpy arrays for processing
-    images = np.array(images)
-    labels1 = np.array(labels1)
+    data = np.array(images).astype('float32') / 255.0   # Normalize
+    labels = np.array(labels1)
 
-    return images, labels1
+    return data, labels
 
 
 
 if __name__ == '__main__':
 
-    images, labels1 = get_data(datasets)
+    data, labels = get_data(datasets)
 
-    print(images.shape)
-    print(labels1.shape)
+    print(data.shape)
+    print(labels.shape)

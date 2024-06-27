@@ -6,6 +6,10 @@ cache/
 __pycache__/
 **/__pycache__/
 
+# Ignore all .vscode folders
+.vscode/
+**/.vscode/
+
 # Ignore everything in the datasets folder
 data/datasets/*
 data/images/*
@@ -14,4 +18,7 @@ data/images/*
 # models/trained_models/*
 models/trained_models/old/*
 models/trained_models/extra/*
+
+
+
 
