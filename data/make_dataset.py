@@ -16,6 +16,11 @@ image_sets = [
     'cyberzoo_set1',
     'cyberzoo_set2',
     'cyberzoo_set3',
+    'all_data',
+    'cyberzoo_set4',
+    'data_test_v2',
+    'data1',
+    'test1',
 ]
 
 # images will be reshaped to match the desired shape

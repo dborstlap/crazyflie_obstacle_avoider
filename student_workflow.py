@@ -20,24 +20,14 @@ from data.get_training_data import get_data
 # MAKE DATASET
 
 # STEP 3
-#
+# make NN
+
+# STEP 4
+# Train NN
+
+# STEP 5
+# evaluate model
 
 
 
 
-image_width = 324
-image_height = 244
-
-
-
-# GET DATA
-data_dir = 'data/datasets'
-
-data_files = [
-    'cyberzoo_set1.pickle',
-    'cyberzoo_set2.pickle',
-    'cyberzoo_set3.pickle',
-    'all_data.pickle',
-]
-
-all_images, all_labels_array = get_data(data_files)

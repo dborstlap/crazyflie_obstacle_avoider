@@ -1,13 +1,6 @@
-# TODO check accuracy of newly trained my_classification.tflite model
-# TODO       - make file to run model and print predictions and labels
-# TODO       - check if predictions are in correct range. Did I normalize input data? Dont think so but better to check.
 # TODO go over https://github.com/google-coral/tutorials/blob/52b60653698a10e7c83c5761cf6a2acc3db57d22/retrain_classification_ptq_tf2.ipynb and improve code based on it
 # TODO Use gatenet to improve this file/model
 # TODO add batch size variable, make train_generator
-
-# TODO mismatching inputs? Becasue example trained on size 324x224 and I am using 244x324
-
-# TODO new trained model might be too big for crazyfly. Check size of model and reduce if necessary.
 
 """
 documentation:
@@ -24,7 +17,8 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from data.get_training_data import get_data, datasets
 from sklearn.model_selection import train_test_split
-from models.model4 import model4
+from models.model1 import model1
+from models.model5 import model5
 
 
 MODEL_NAME = "my_classification_brightness_distribution.tflite"
@@ -42,7 +36,7 @@ FIRST_LAYER_STRIDE = 2
 epochs = 100
 
 # define model
-model = model4
+model = model5
 
 
 # retrieve training data
@@ -59,12 +53,10 @@ data_train, data_test, labels_train, labels_test = train_test_split(data, labels
 
 
 # model.compile(optimizer=tf.keras.optimizers.Adam(1e-5), loss="mean_squared_error", metrics=["mae"])
-model.compile(optimizer='adam', loss='mean_absolute_error', metrics=['mean_absolute_error'])  # mean_absolute_error
+model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mean_absolute_error'])  # mean_absolute_error
 
 model.summary()
 print("Number of trainable weights = {}".format(len(model.trainable_weights)))
-
-
 
 
 # Train the custom head
@@ -145,50 +137,4 @@ with open(f"{ROOT_PATH}/train/trained_models/{MODEL_NAME_QUANT}", "wb") as f:
 
 
 
-# VALIDATE MODEL
 
-# batch_images, batch_labels = next(val_generator)
-
-# logits = model(batch_images)
-# prediction = np.argmax(logits, axis=1)
-# truth = np.argmax(batch_labels, axis=1)
-
-# keras_accuracy = tf.keras.metrics.Accuracy()
-# keras_accuracy(prediction, truth)
-
-# print("Raw model accuracy: {:.3%}".format(keras_accuracy.result()))
-
-# def set_input_tensor(interpreter, input):
-#     input_details = interpreter.get_input_details()[0]
-#     tensor_index = input_details["index"]
-#     input_tensor = interpreter.tensor(tensor_index)()[0]
-#     input_tensor[:, :] = input
-
-# def classify_image(interpreter, input):
-#     set_input_tensor(interpreter, input)
-#     interpreter.invoke()
-#     output_details = interpreter.get_output_details()[0]
-#     output = interpreter.get_tensor(output_details["index"])
-#     # Outputs from the TFLite model are uint8, so we dequantize the results:
-#     scale, zero_point = output_details["quantization"]
-#     output = scale * (output - zero_point)
-#     top_1 = np.argmax(output)
-#     return top_1
-
-# interpreter = tf.lite.Interpreter(
-#     f"{ROOT_PATH}/model/classification_q.tflite"
-# )
-# interpreter.allocate_tensors()
-
-# # Collect all inference predictions in a list
-# batch_prediction = []
-# batch_truth = np.argmax(batch_labels, axis=1)
-
-# for i in range(len(batch_images)):
-#     prediction = classify_image(interpreter, batch_images[i])
-#     batch_prediction.append(prediction)
-
-# # Compare all predictions to the ground truth
-# tflite_accuracy = tf.keras.metrics.Accuracy()
-# tflite_accuracy(batch_prediction, batch_truth)
-# print("Quant TF Lite accuracy: {:.3%}".format(tflite_accuracy.result()))
