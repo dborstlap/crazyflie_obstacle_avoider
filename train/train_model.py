@@ -31,15 +31,15 @@ MODEL_NAME = "my_classification_brightness_distribution.tflite"
 MODEL_NAME_QUANT = "my_classification_brightness_distribution_q.tflite"
 
 # path of repository (crazyflie_obstacle_avoider)
-ROOT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
-DATASET_PATH_QUANT = 'data/datasets/all_data'
+ROOT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+DATASET_PATH_QUANT = 'data/images/cyberzoo_set1'
 
 image_width = 324
 image_height = 244
 number_of_labels = 3
 
 FIRST_LAYER_STRIDE = 2
-epochs = 1
+epochs = 100
 
 # define model
 model = model4
@@ -49,8 +49,8 @@ model = model4
 data, labels = get_data(datasets)
 
 # Assert data shape
-expected_shape = (image_height, image_width, 1)
-assert data.shape[1:] == (image_height, image_width, 1), "Data shape does not match expected shape"
+expected_shape = (image_width, image_height, 1)
+assert data.shape[1:] == expected_shape, "Data shape does not match expected shape"
 assert labels.shape[1:][0] == number_of_labels, "Label shape does not match expected shape"
 
 
@@ -107,7 +107,7 @@ history = model.fit(
 converter = tf.lite.TFLiteConverter.from_keras_model(model)
 tflite_model = converter.convert()
 
-with open(f"{ROOT_PATH}/trained_models/{MODEL_NAME}", "wb") as f:
+with open(f"{ROOT_PATH}/train/trained_models/{MODEL_NAME}", "wb") as f:
     f.write(tflite_model)
 
 
@@ -118,7 +118,7 @@ def representative_data_gen():
         image = next(iter(dataset_list))
         image = tf.io.read_file(image)
         image = tf.io.decode_jpeg(image, channels=1) # grayscale, for color channels=3
-        image = tf.image.resize(image, [image_height, image_width])
+        image = tf.image.resize(image, [image_width, image_height])
         image = tf.cast(image / 255.0, tf.float32)
         image = tf.expand_dims(image, 0)
         yield [image]
@@ -140,7 +140,7 @@ converter.inference_output_type = tf.uint8
 tflite_model = converter.convert()
 
 
-with open(f"{ROOT_PATH}/deploy/classification/model/{MODEL_NAME_QUANT}", "wb") as f:
+with open(f"{ROOT_PATH}/train/trained_models/{MODEL_NAME_QUANT}", "wb") as f:
     f.write(tflite_model)
 
 

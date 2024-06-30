@@ -10,7 +10,7 @@ datasets = [
 ]
 
 
-def get_data(datasets):
+def get_data(datasets, target_shape=(324, 244, 1)):
     images = []
     labels1 = []    
 
@@ -29,6 +29,7 @@ def get_data(datasets):
 
     # Convert lists to numpy arrays for processing
     data = np.array(images).astype('float32') / 255.0   # Normalize
+    data = data.reshape(len(data), *target_shape)
     labels = np.array(labels1)
 
     return data, labels
