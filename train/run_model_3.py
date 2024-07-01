@@ -1,3 +1,5 @@
+# THIS workds better than run_model because no pre-computation/scaling is needed on the image before feeding into quant network! Dont know how it workds tho :'D
+
 
 import tensorflow as tf
 import cv2
@@ -16,42 +18,31 @@ def load_tflite_model(model_path):
     interpreter.allocate_tensors()
     return interpreter
 
+def set_input_tensor(interpreter, input):
+    input_details = interpreter.get_input_details()[0]
+    tensor_index = input_details["index"]
+    input_tensor = interpreter.tensor(tensor_index)()[0]
+    input_tensor[:, :] = input
 
+def classify_image(interpreter, input, quant=False):
+    set_input_tensor(interpreter, input)
+    interpreter.invoke()
+    output_details = interpreter.get_output_details()[0]
+    output = interpreter.get_tensor(output_details["index"])
+    
+    if quant:
+        # Outputs from the TFLite model are uint8, so we dequantize the results:
+        scale, zero_point = output_details["quantization"]
+        output = scale * (output - zero_point)
+    return output
 
-
-def run_inference_batch(model_path, data, quant=False):
-
+def run_inference_batch(model_path, batch_images, quant=False):
     interpreter = load_tflite_model(model_path)
 
     outputs = []
-
-    for input in data.astype('float32'):
-        # set input tensor
-        input_details = interpreter.get_input_details()[0]
-
-        #Resize
-        input = cv2.resize(input,(input_details['shape'][2],input_details['shape'][1]))
-        input = np.expand_dims(input, axis=0) # TODO add comments and explanation
-        input = np.expand_dims(input, axis=3)
-
-        # if not quant:
-        #     interpreter.set_tensor(input_details['index'], input.astype('float32'))
-        # else:
-        #     scale, zero_point = input_details['quantization']
-        #     interpreter.set_tensor(input_details['index'], np.uint8(image_in / scale + zero_point))
-
-        interpreter.set_tensor(input_details['index'], input)
-    
-        interpreter.invoke()
-        output_details = interpreter.get_output_details()[0]
-        output = interpreter.get_tensor(output_details["index"])
-
-        # Outputs from the TFLite model are uint8, so we dequantize the results:
-        if quant:
-            scale, zero_point = output_details["quantization"]
-            output = scale * (output - zero_point)
-        outputs.append(output[0])
-
+    for i in range(len(batch_images)):
+        prediction = classify_image(interpreter, batch_images[i], quant)
+        outputs.append(prediction)
     return outputs
 
 

@@ -28,7 +28,7 @@ def get_data(datasets, target_shape=(324, 244, 1)):
         labels1.extend(labels1_loaded)
 
     # Convert lists to numpy arrays for processing
-    data = np.array(images).astype('float32') / 255.0   # Normalize
+    data = np.array(images).astype('float32')
     data = np.transpose(data, (0, 2, 1, 3))
 
     labels = np.array(labels1)

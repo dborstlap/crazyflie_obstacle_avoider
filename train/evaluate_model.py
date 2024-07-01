@@ -10,8 +10,8 @@ from run_model import run_inference_batch
 data, labels = get_data(datasets)
 
 script_dir = os.path.abspath(os.path.dirname(__file__))
-model_path = os.path.join(script_dir, 'trained_models/my_classification_brightness_distribution.tflite')
-model_path_q = os.path.join(script_dir, 'trained_models/my_classification_brightness_distribution_q.tflite')
+model_path = os.path.join(script_dir, 'trained_models/255_input.tflite')
+model_path_q = os.path.join(script_dir, 'trained_models/255_input_q.tflite')
 
 predictions = run_inference_batch(model_path, data)
 predictions_q = run_inference_batch(model_path_q, data, quant=True)

@@ -1,6 +1,8 @@
 # TODO go over https://github.com/google-coral/tutorials/blob/52b60653698a10e7c83c5761cf6a2acc3db57d22/retrain_classification_ptq_tf2.ipynb and improve code based on it
 # TODO Use gatenet to improve this file/model
 # TODO add batch size variable, make train_generator
+# TODO make it cutoff training at certain point.
+
 
 """
 documentation:
@@ -19,10 +21,11 @@ from data.get_training_data import get_data, datasets
 from sklearn.model_selection import train_test_split
 from models.model1 import model1
 from models.model5 import model5
+import tensorflow_model_optimization as tfmot
 
 
-MODEL_NAME = "my_classification_brightness_distribution.tflite"
-MODEL_NAME_QUANT = "my_classification_brightness_distribution_q.tflite"
+MODEL_NAME = "255_input.tflite"
+MODEL_NAME_QUANT = "255_input_q.tflite"
 
 # path of repository (crazyflie_obstacle_avoider)
 ROOT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -33,11 +36,11 @@ image_height = 244
 number_of_labels = 3
 
 FIRST_LAYER_STRIDE = 2
-epochs = 100
+epochs = 1000
 
 # define model
 model = model5
-
+# model = tfmot.quantization.keras.quantize_model(model)
 
 # retrieve training data
 data, labels = get_data(datasets)
@@ -66,6 +69,8 @@ history = model.fit(
     epochs=epochs,
     validation_data=(data_test, labels_test)
 )
+# model.fit(datasetTrain, validation_data=datasetVal, epochs = EPOCHS, callbacks = [tensorboard_callback])
+
 
 
 ##  FINE TUNE the model
@@ -111,7 +116,7 @@ def representative_data_gen():
         image = tf.io.read_file(image)
         image = tf.io.decode_jpeg(image, channels=1) # grayscale, for color channels=3
         image = tf.image.resize(image, [image_width, image_height])
-        image = tf.cast(image / 255.0, tf.float32)
+        image = tf.cast(image, tf.float32)  # / 255.0 
         image = tf.expand_dims(image, 0)
         yield [image]
 
