@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from get_training_data import get_data, datasets
+from data.get_data import get_data, datasets
 
 
 

@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from data.get_training_data import get_data, datasets
+from data.get_data import get_data, datasets
 
 
 def set_input_tensor(interpreter, input, quant):

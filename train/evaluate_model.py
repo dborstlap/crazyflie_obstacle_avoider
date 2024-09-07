@@ -4,7 +4,7 @@ import os
 import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from data.get_training_data import get_data, datasets
+from data.get_data import get_data, datasets
 from run_model import run_inference_batch
 
 data, labels = get_data(datasets)

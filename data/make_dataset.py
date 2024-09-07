@@ -9,38 +9,55 @@ import tensorflow as tf
 
 # ------------------ PARAMETERS ---------------------------
 # name of the dataset (it will be stored under this name)
-dataset_name = 'my_dataset_1'
+dataset_name = 'classification_dataset'
 
 # define which sets of image you want to use
 image_sets = [
-    'cyberzoo_set1',
-    'cyberzoo_set2',
-    'cyberzoo_set3',
-    'all_data',
-    'cyberzoo_set4',
-    'data_test_v2',
-    'data1',
-    'test1',
+    'training_data_christmas_packet',
+    # 'cyberzoo_set1',
+    # 'cyberzoo_set2',
+    # 'cyberzoo_set3',
+    # 'all_data',
+    # 'cyberzoo_set4',
+    # 'data_test_v2',
+    # 'data1',
+    # 'test1',
 ]
 
 # images will be reshaped to match the desired shape
 resolution = (244, 324)  # Resolution that the image should be
 
-
 # ------------------ RETRIEVE DATA ---------------------------
 
 images = []  # List to store image data
+labels1 = []  # List to store image labels
+
 for image_set in image_sets:
     file_path = os.path.abspath(os.path.dirname(__file__))
     image_folder = os.path.join(file_path, 'images', image_set)
-    for filename in os.listdir(image_folder):
-        image_path = os.path.join(image_folder, filename)
 
-        # Check if the file is an image
-        if filename.endswith('.png') or filename.endswith('.jpg'):
-            img = tf.keras.preprocessing.image.load_img(image_path, color_mode='grayscale', target_size=resolution)
-            img = tf.keras.preprocessing.image.img_to_array(img)
-            images.append(img)
+    # Walk through the folder recursively
+    for root, dirs, files in os.walk(image_folder):
+        for filename in files:
+            image_path = os.path.join(root, filename)
+
+            # Check if the file is an image
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                # Load image and convert to array
+                img = tf.keras.preprocessing.image.load_img(image_path, color_mode='grayscale', target_size=resolution)
+                img = tf.keras.preprocessing.image.img_to_array(img)
+                images.append(img)
+
+                # Determine label based on folder name
+                if 'background' in root.lower():
+                    label = [1., 0.]  # Background label
+                elif 'packet' in root.lower():
+                    label = [0., 1.]  # Packet label
+                else:
+                    label = [0., 0.]
+                      # Default or unknown (you can choose how to handle this)
+                
+                labels1.append(label)
 
 
 # ------------------ AUGMENT DATA ---------------------------
@@ -50,22 +67,22 @@ for image_set in image_sets:
 
 # ------------------ LABEL DATA ---------------------------
 
-labels1 = []
+# labels1 = []
 
-for img in images:
-    # Split the image into 3 vertical strips
-    width = img.shape[1]
-    strip_width = width // 3
-    strips = [img[:, i*strip_width:(i+1)*strip_width] for i in range(3)]
+# for img in images:
+#     # Split the image into 3 vertical strips
+#     width = img.shape[1]
+#     strip_width = width // 3
+#     strips = [img[:, i*strip_width:(i+1)*strip_width] for i in range(3)]
 
-    # Calculate the average brightness of each strip
-    brightness_left = strips[0].mean() / 255.
-    brightness_middle = strips[1].mean() / 255.
-    brightness_right = strips[2].mean() / 255.
+#     # Calculate the average brightness of each strip
+#     brightness_left = strips[0].mean() / 255.
+#     brightness_middle = strips[1].mean() / 255.
+#     brightness_right = strips[2].mean() / 255.
 
-    # Output the brightness values in an array
-    label1 = [brightness_left, brightness_middle, brightness_right]
-    labels1.append(label1)
+#     # Output the brightness values in an array
+#     label1 = [brightness_left, brightness_middle, brightness_right]
+#     labels1.append(label1)
 
 
 # ------------------ SAVE DATASET ---------------------------

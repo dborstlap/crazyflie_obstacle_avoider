@@ -20,7 +20,7 @@ import numpy as np
 import tensorflow as tf
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from data.get_training_data import get_data, data_files
+from data.get_data import get_data, data_files
 from sklearn.model_selection import train_test_split
 from model import model_orig, model1, model2, model3
 

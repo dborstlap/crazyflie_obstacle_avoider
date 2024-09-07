@@ -6,7 +6,7 @@ import tf2onnx
 import tensorflow_model_optimization as tfmot
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from data.get_training_data import get_data, data_files
+from data.get_data import get_data, data_files
 # from neural_nets.model1 import model1
 # from neural_nets.model2 import model2
 # from neural_nets.model_pulpdronenet_try1 import dronet_model

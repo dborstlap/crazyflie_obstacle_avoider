@@ -10,7 +10,7 @@ import os
 import numpy as np
 import tensorflow as tf
 
-from data.get_training_data import get_data
+from data.get_data import get_data
 
 
 # STEP 1

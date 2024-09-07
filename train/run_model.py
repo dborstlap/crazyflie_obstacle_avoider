@@ -1,3 +1,7 @@
+# THIS workds better than old run_model because no pre-computation/scaling is needed on the image before feeding into quant network! Dont know how it workds tho :'D
+
+
+# TODO: might not work because of np.transpose(data, (0, 2, 1, 3)) data ordered/transpose/loaded differently in run_model vs training???
 
 import tensorflow as tf
 import cv2
@@ -7,7 +11,7 @@ import matplotlib.pyplot as plt
 import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from data.get_training_data import get_data, datasets
+from data.get_data import get_data
 
 
 def load_tflite_model(model_path):
@@ -16,42 +20,31 @@ def load_tflite_model(model_path):
     interpreter.allocate_tensors()
     return interpreter
 
+def set_input_tensor(interpreter, input):
+    input_details = interpreter.get_input_details()[0]
+    tensor_index = input_details["index"]
+    input_tensor = interpreter.tensor(tensor_index)()[0]
+    input_tensor[:, :] = input
 
+def classify_image(interpreter, input, quant=False):
+    set_input_tensor(interpreter, input)
+    interpreter.invoke()
+    output_details = interpreter.get_output_details()[0]
+    output = interpreter.get_tensor(output_details["index"])
+    
+    if quant:
+        # Outputs from the TFLite model are uint8, so we dequantize the results:
+        scale, zero_point = output_details["quantization"]
+        output = scale * (output - zero_point)
+    return output
 
-
-def run_inference_batch(model_path, data, quant=False):
-
+def run_inference_batch(model_path, batch_images, quant=False):
     interpreter = load_tflite_model(model_path)
 
     outputs = []
-
-    for input in data.astype('float32'):
-        # set input tensor
-        input_details = interpreter.get_input_details()[0]
-
-        #Resize
-        input = cv2.resize(input,(input_details['shape'][2],input_details['shape'][1]))
-        input = np.expand_dims(input, axis=0) # TODO add comments and explanation
-        input = np.expand_dims(input, axis=3)
-
-        # if not quant:
-        #     interpreter.set_tensor(input_details['index'], input.astype('float32'))
-        # else:
-        #     scale, zero_point = input_details['quantization']
-        #     interpreter.set_tensor(input_details['index'], np.uint8(image_in / scale + zero_point))
-
-        interpreter.set_tensor(input_details['index'], input)
-    
-        interpreter.invoke()
-        output_details = interpreter.get_output_details()[0]
-        output = interpreter.get_tensor(output_details["index"])
-
-        # Outputs from the TFLite model are uint8, so we dequantize the results:
-        if quant:
-            scale, zero_point = output_details["quantization"]
-            output = scale * (output - zero_point)
-        outputs.append(output[0])
-
+    for i in range(len(batch_images)):
+        prediction = classify_image(interpreter, batch_images[i], quant)
+        outputs.append(prediction)
     return outputs
 
 
@@ -59,22 +52,22 @@ def run_inference_batch(model_path, data, quant=False):
 
 if __name__ == '__main__':
     # define model and image folders or dataset
-    data, labels = get_data(datasets)
+    data, labels = get_data(datasets=['classification_dataset.h5'])
     images = np.transpose(data, (0, 2, 1, 3))
 
     # Get the directory of the trained models
     script_dir = os.path.abspath(os.path.dirname(__file__))
-    model_path = os.path.join(script_dir, 'trained_models/255_input.tflite')
-    model_path_q = os.path.join(script_dir, 'trained_models/255_input_q.tflite')
+    # model_path = os.path.join(script_dir, 'trained_models/255_input.tflite')
+    
+    # model_path_q = os.path.join(script_dir, 'trained_models/255_input_try_q.tflite')
+    model_path_q = os.path.join(script_dir, 'trained_models/classification_q.tflite')
 
-    outputs = run_inference_batch(model_path, data)
+    # outputs = run_inference_batch(model_path, data)
     outputs_q = run_inference_batch(model_path_q, data, quant=True)
 
-    for image, label, output, output_q in zip(images, labels, outputs, outputs_q):
+    for image, label, output_q in zip(images, labels, outputs_q):
 
-        print('Label:', label)
-        print('output:', output)
-        print('output_q:', output_q)
+        print('Truth:', label,'output_q:', output_q)
 
         cv2.imshow('out', image.astype('uint8'))
         cv2.waitKey(0)

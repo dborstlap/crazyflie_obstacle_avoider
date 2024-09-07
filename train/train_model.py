@@ -17,15 +17,15 @@ import numpy as np
 import tensorflow as tf
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from data.get_training_data import get_data, datasets
+from data.get_data import get_data, datasets
 from sklearn.model_selection import train_test_split
 from models.model1 import model1
 from models.model5 import model5
 import tensorflow_model_optimization as tfmot
 
 
-MODEL_NAME = "255_input.tflite"
-MODEL_NAME_QUANT = "255_input_q.tflite"
+MODEL_NAME = "255_input_try.tflite"
+MODEL_NAME_QUANT = "255_input_try_q.tflite"
 
 # path of repository (crazyflie_obstacle_avoider)
 ROOT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -36,7 +36,7 @@ image_height = 244
 number_of_labels = 3
 
 FIRST_LAYER_STRIDE = 2
-epochs = 1000
+epochs = 2000
 
 # define model
 model = model5
@@ -46,8 +46,8 @@ model = model5
 data, labels = get_data(datasets)
 
 # Assert data shape
-expected_shape = (image_width, image_height, 1)
-assert data.shape[1:] == expected_shape, "Data shape does not match expected shape"
+expected_data_shape = (image_width, image_height, 1)
+assert data.shape[1:] == expected_data_shape, "Data shape does not match expected shape"
 assert labels.shape[1:][0] == number_of_labels, "Label shape does not match expected shape"
 
 

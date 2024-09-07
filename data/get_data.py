@@ -5,10 +5,6 @@ import os
 import h5py
 
 
-datasets = [
-    'my_dataset_1.h5',
-]
-
 
 def get_data(datasets, target_shape=(324, 244, 1)):
     images = []
@@ -29,6 +25,8 @@ def get_data(datasets, target_shape=(324, 244, 1)):
 
     # Convert lists to numpy arrays for processing
     data = np.array(images).astype('float32')
+    # print("Data shape before transpose:", data.shape)
+    # print(data)
     data = np.transpose(data, (0, 2, 1, 3))
 
     labels = np.array(labels1)
@@ -38,6 +36,9 @@ def get_data(datasets, target_shape=(324, 244, 1)):
 
 
 if __name__ == '__main__':
+
+    datasets=['my_dataset_1.h5',
+              'classification_dataset.h5']
 
     data, labels = get_data(datasets)
 
