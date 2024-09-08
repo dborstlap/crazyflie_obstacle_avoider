@@ -9,19 +9,19 @@ import tensorflow as tf
 
 # ------------------ PARAMETERS ---------------------------
 # name of the dataset (it will be stored under this name)
-dataset_name = 'classification_dataset'
+dataset_name = 'dataset_2'
 
 # define which sets of image you want to use
 image_sets = [
     'training_data_christmas_packet',
-    # 'cyberzoo_set1',
-    # 'cyberzoo_set2',
-    # 'cyberzoo_set3',
-    # 'all_data',
-    # 'cyberzoo_set4',
-    # 'data_test_v2',
-    # 'data1',
-    # 'test1',
+    'cyberzoo_set1',
+    'cyberzoo_set2',
+    'cyberzoo_set3',
+    'all_data',
+    'cyberzoo_set4',
+    'data_test_v2',
+    'data1',
+    'test1',
 ]
 
 # images will be reshaped to match the desired shape
@@ -48,15 +48,27 @@ for image_set in image_sets:
                 img = tf.keras.preprocessing.image.img_to_array(img)
                 images.append(img)
 
-                # Determine label based on folder name
-                if 'background' in root.lower():
-                    label = [1., 0.]  # Background label
-                elif 'packet' in root.lower():
-                    label = [0., 1.]  # Packet label
+                """ Classification example labels"""
+                # # Determine label based on folder name
+                # if 'background' in root.lower():
+                #     label = [1., 0.]  # Background label
+                # elif 'packet' in root.lower():
+                #     label = [0., 1.]  # Packet label
+                # else:
+                #     label = [0., 0.]
+                #       # Default or unknown (you can choose how to handle this)
+
+                """ Classification example labels"""
+                # Calculate the average brightness of the left and right side of the image
+                brightness_left = img[:, :img.shape[1]//2].mean() / 255.
+                brightness_right = img[:, img.shape[1]//2:].mean() / 255.
+
+                # Determine label based on brightness comparison
+                if brightness_left > brightness_right:
+                    label = [1., 0.]  # Left side is brighter
                 else:
-                    label = [0., 0.]
-                      # Default or unknown (you can choose how to handle this)
-                
+                    label = [0., 1.]  # Right side is brighter or equally bright
+
                 labels1.append(label)
 
 

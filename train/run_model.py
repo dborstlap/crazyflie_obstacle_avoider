@@ -49,18 +49,17 @@ def run_inference_batch(model_path, batch_images, quant=False):
 
 
 
-
 if __name__ == '__main__':
     # define model and image folders or dataset
-    data, labels = get_data(datasets=['classification_dataset.h5'])
+    data, labels = get_data(datasets=['dataset_2.h5'])
     images = np.transpose(data, (0, 2, 1, 3))
-
+    
     # Get the directory of the trained models
     script_dir = os.path.abspath(os.path.dirname(__file__))
     # model_path = os.path.join(script_dir, 'trained_models/255_input.tflite')
-    
-    # model_path_q = os.path.join(script_dir, 'trained_models/255_input_try_q.tflite')
-    model_path_q = os.path.join(script_dir, 'trained_models/classification_q.tflite')
+
+    model_path_q = os.path.join(script_dir, 'trained_models/classification_brightness_q.tflite')
+    # model_path_q = os.path.join(script_dir, 'trained_models/classification_q.tflite')
 
     # outputs = run_inference_batch(model_path, data)
     outputs_q = run_inference_batch(model_path_q, data, quant=True)

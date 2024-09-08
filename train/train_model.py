@@ -17,15 +17,17 @@ import numpy as np
 import tensorflow as tf
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from data.get_data import get_data, datasets
+from data.get_data import get_data
 from sklearn.model_selection import train_test_split
-from models.model1 import model1
+# from models.model1 import model1
 from models.model5 import model5
+# from models.model_classification import model
 import tensorflow_model_optimization as tfmot
 
 
-MODEL_NAME = "255_input_try.tflite"
-MODEL_NAME_QUANT = "255_input_try_q.tflite"
+NAME = "classification_brightness_ownmodel"
+MODEL_NAME = NAME + ".tflite"
+MODEL_NAME_QUANT = NAME + "_q.tflite"
 
 # path of repository (crazyflie_obstacle_avoider)
 ROOT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -33,17 +35,17 @@ DATASET_PATH_QUANT = 'data/images/cyberzoo_set1'
 
 image_width = 324
 image_height = 244
-number_of_labels = 3
+number_of_labels = 2
 
-FIRST_LAYER_STRIDE = 2
-epochs = 2000
+epochs = 100
 
 # define model
 model = model5
+
 # model = tfmot.quantization.keras.quantize_model(model)
 
 # retrieve training data
-data, labels = get_data(datasets)
+data, labels = get_data(datasets=['dataset_2.h5'])
 
 # Assert data shape
 expected_data_shape = (image_width, image_height, 1)
@@ -55,8 +57,8 @@ assert labels.shape[1:][0] == number_of_labels, "Label shape does not match expe
 data_train, data_test, labels_train, labels_test = train_test_split(data, labels, test_size=0.2, random_state=42)
 
 
-# model.compile(optimizer=tf.keras.optimizers.Adam(1e-5), loss="mean_squared_error", metrics=["mae"])
-model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mean_absolute_error'])  # mean_absolute_error
+# model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mean_absolute_error'])
+model.compile(optimizer=tf.keras.optimizers.Adam(1e-6), loss='categorical_crossentropy', metrics=["accuracy"])
 
 model.summary()
 print("Number of trainable weights = {}".format(len(model.trainable_weights)))
@@ -69,6 +71,7 @@ history = model.fit(
     epochs=epochs,
     validation_data=(data_test, labels_test)
 )
+
 # model.fit(datasetTrain, validation_data=datasetVal, epochs = EPOCHS, callbacks = [tensorboard_callback])
 
 
@@ -106,7 +109,7 @@ tflite_model = converter.convert()
 
 with open(f"{ROOT_PATH}/train/trained_models/{MODEL_NAME}", "wb") as f:
     f.write(tflite_model)
-
+    print(f"Model saved as {MODEL_NAME}")
 
 # QUANTIZE MODEL
 def representative_data_gen():
@@ -139,7 +142,7 @@ tflite_model = converter.convert()
 
 with open(f"{ROOT_PATH}/train/trained_models/{MODEL_NAME_QUANT}", "wb") as f:
     f.write(tflite_model)
-
+    print(f"Model saved as {MODEL_NAME_QUANT}")
 
 
 

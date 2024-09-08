@@ -16,7 +16,7 @@ model5 = tf.keras.Sequential([
   tf.keras.layers.AveragePooling2D(10,10),
   tf.keras.layers.Flatten(),
   tf.keras.layers.Dense(512, activation='relu'),
-  tf.keras.layers.Dense(3)
+  tf.keras.layers.Dense(2)
 ])
 
 

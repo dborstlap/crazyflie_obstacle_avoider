@@ -81,9 +81,9 @@ def classify_image(interpreter, input):
     output_details = interpreter.get_output_details()[0]
     output = interpreter.get_tensor(output_details["index"])
     # Outputs from the TFLite model are uint8, so we dequantize the results:
-    scale, zero_point = output_details["quantization"]
-    output = scale * (output - zero_point)
-    top_1 = np.argmax(output)
+    # scale, zero_point = output_details["quantization"]
+    # output = scale * (output - zero_point)
+    # top_1 = np.argmax(output)
     return output
 
 interpreter = tf.lite.Interpreter(
