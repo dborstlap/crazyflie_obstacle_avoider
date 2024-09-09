@@ -21,11 +21,11 @@ from data.get_data import get_data
 from sklearn.model_selection import train_test_split
 # from models.model1 import model1
 from models.model5 import model5
-# from models.model_classification import model
+from models.model_classification import model
 import tensorflow_model_optimization as tfmot
 
 
-NAME = "classification_brightness_ownmodel"
+NAME = "classification_brightness"
 MODEL_NAME = NAME + ".tflite"
 MODEL_NAME_QUANT = NAME + "_q.tflite"
 
@@ -37,10 +37,10 @@ image_width = 324
 image_height = 244
 number_of_labels = 2
 
-epochs = 100
+epochs = 2
 
 # define model
-model = model5
+model = model
 
 # model = tfmot.quantization.keras.quantize_model(model)
 

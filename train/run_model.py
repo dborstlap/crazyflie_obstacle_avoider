@@ -66,6 +66,9 @@ if __name__ == '__main__':
 
     for image, label, output_q in zip(images, labels, outputs_q):
 
+        print(image.shape)
+        
+
         print('Truth:', label,'output_q:', output_q)
 
         cv2.imshow('out', image.astype('uint8'))
