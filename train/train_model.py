@@ -78,19 +78,13 @@ print("Number of trainable weights = {}".format(len(model.trainable_weights)))
 ROOT_PATH = os.path.abspath(os.curdir)
 DATASET_PATH = f"{ROOT_PATH}/data/images/class_brightness"
 
-train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(
-    rotation_range=1,
-    shear_range=0.01,
-    zoom_range=0.01,
-    horizontal_flip=False,
-    brightness_range=[0.5, 1.5],
-)
+train_datagen = tf.keras.preprocessing.image.ImageDataGenerator()
 
 train_generator = train_datagen.flow_from_directory(
     f"{DATASET_PATH}/train",
     target_size=(image_width, image_height),
     batch_size=batch_size,
-    class_mode="categorical",
+    class_mode="raw",
     color_mode="grayscale",
 )
 
@@ -104,20 +98,20 @@ val_generator = val_datagen.flow_from_directory(
 )
 
 
-# """own generator for numerical value prediction"""
-# def custom_data_generator(image_paths, labels):
-#     for img_path, label in zip(image_paths, labels):
-#         image = load_image(img_path)  # Your custom image loading logic
-#         yield image, label
+"""own generator for numerical value prediction"""
+def custom_data_generator(image_paths, labels):
+    for img_path, label in zip(image_paths, labels):
+        image = load_image(img_path)  # Your custom image loading logic
+        yield image, label
 
-# # Create a tf.data.Dataset from the custom generator
-# dataset = tf.data.Dataset.from_generator(
-#     lambda: custom_data_generator(image_paths, labels),
-#     output_signature=(
-#         tf.TensorSpec(shape=(image_height, image_width, 3), dtype=tf.float32),
-#         tf.TensorSpec(shape=(num_classes,), dtype=tf.float32)
-#     )
-# )
+# Create a tf.data.Dataset from the custom generator
+dataset = tf.data.Dataset.from_generator(
+    lambda: custom_data_generator(image_paths, labels),
+    output_signature=(
+        tf.TensorSpec(shape=(image_height, image_width, 3), dtype=tf.float32),
+        tf.TensorSpec(shape=(num_classes,), dtype=tf.float32)
+    )
+)
 
 
 history = model.fit(
