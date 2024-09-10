@@ -19,9 +19,10 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from data.get_data import get_data
 from sklearn.model_selection import train_test_split
-# from models.model1 import model1
+from models.model1 import model1
 from models.model5 import model5
 from models.model_classification import model
+from models.model_brightness_determinator import model_brightness
 import tensorflow_model_optimization as tfmot
 
 
@@ -36,8 +37,9 @@ DATASET_PATH_QUANT = 'data/images/cyberzoo_set1'
 image_width = 324
 image_height = 244
 number_of_labels = 2
+batch_size = 50
 
-epochs = 2
+epochs = 200
 
 # define model
 model = model
@@ -58,18 +60,72 @@ data_train, data_test, labels_train, labels_test = train_test_split(data, labels
 
 
 # model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mean_absolute_error'])
-model.compile(optimizer=tf.keras.optimizers.Adam(1e-6), loss='categorical_crossentropy', metrics=["accuracy"])
+# model.compile(optimizer=tf.keras.optimizers.Adam(1e-5), loss='categorical_crossentropy', metrics=["accuracy"])
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=["accuracy"])
 
 model.summary()
 print("Number of trainable weights = {}".format(len(model.trainable_weights)))
 
 
 # Train the custom head
+# history = model.fit(
+#     x=data_train,
+#     y=labels_train,
+#     epochs=epochs,
+#     validation_data=(data_test, labels_test)
+# )
+
+ROOT_PATH = os.path.abspath(os.curdir)
+DATASET_PATH = f"{ROOT_PATH}/data/images/class_brightness"
+
+train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(
+    rotation_range=1,
+    shear_range=0.01,
+    zoom_range=0.01,
+    horizontal_flip=False,
+    brightness_range=[0.5, 1.5],
+)
+
+train_generator = train_datagen.flow_from_directory(
+    f"{DATASET_PATH}/train",
+    target_size=(image_width, image_height),
+    batch_size=batch_size,
+    class_mode="categorical",
+    color_mode="grayscale",
+)
+
+val_datagen = tf.keras.preprocessing.image.ImageDataGenerator() # imports as float32
+val_generator = val_datagen.flow_from_directory(
+    f"{DATASET_PATH}/validation",
+    target_size=(image_width, image_height),
+    batch_size=batch_size,
+    class_mode="categorical",
+    color_mode="grayscale",
+)
+
+
+# """own generator for numerical value prediction"""
+# def custom_data_generator(image_paths, labels):
+#     for img_path, label in zip(image_paths, labels):
+#         image = load_image(img_path)  # Your custom image loading logic
+#         yield image, label
+
+# # Create a tf.data.Dataset from the custom generator
+# dataset = tf.data.Dataset.from_generator(
+#     lambda: custom_data_generator(image_paths, labels),
+#     output_signature=(
+#         tf.TensorSpec(shape=(image_height, image_width, 3), dtype=tf.float32),
+#         tf.TensorSpec(shape=(num_classes,), dtype=tf.float32)
+#     )
+# )
+
+
 history = model.fit(
-    x=data_train,
-    y=labels_train,
+    train_generator,
+    steps_per_epoch=len(train_generator),
     epochs=epochs,
-    validation_data=(data_test, labels_test)
+    validation_data=val_generator,
+    validation_steps=len(val_generator),
 )
 
 # model.fit(datasetTrain, validation_data=datasetVal, epochs = EPOCHS, callbacks = [tensorboard_callback])

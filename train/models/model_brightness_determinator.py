@@ -8,7 +8,7 @@ model_brightness = Sequential([
   layers.Conv2D(64, 3, padding='same', activation='relu'),
   layers.MaxPooling2D(),
   layers.Flatten(),
-  layers.Dense(1)
+  layers.Dense(2)
 ])
 
 
