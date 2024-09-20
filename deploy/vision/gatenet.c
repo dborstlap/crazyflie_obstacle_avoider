@@ -56,12 +56,9 @@ static pi_buffer_t buffer_out;
 #define CAM_HEIGHT 122
 #define CHANNELS 1
 
-#define NN_INPUT_WIDTH 60
-#define NN_INPUT_HEIGHT 40
+#define NN_INPUT_WIDTH 180
+#define NN_INPUT_HEIGHT 120
 #define NN_INPUT_CHANNELS 1
-
-#define GATESIZE_X  0.39// [m]
-#define GATESIZE_Y 0.29// [m]
 
 typedef signed char NETWORK_OUT_TYPE;
 
@@ -252,36 +249,6 @@ static void RunNetwork()
   (inputNetwork, Output_1);
 }
 
-void relativePostition()
-{
-  float sz1_best, sz2_best;
-  sz1_best = (float) (Output_1[2] - Output_1[0]);
-  sz2_best = (float) (Output_1[7] -  Output_1[1]);
-  
-  float size = sz2_best;
-  float gateSize = GATESIZE_Y;
-
-  if (sz1_best > sz2_best){
-    size = sz1_best;
-    gateSize = GATESIZE_X;
-  }
-
-  //float width, height;
-  //width = (float) img->h;
-  //height = (float) img->w;
-  float pix_y = (Output_1[2] - Output_1[0]) / 2.0f;
-  float pix_x = (Output_1[7] -  Output_1[1]) / 2.0f;
-  
-  float angle_x = (pix_x-cameraIntrinsic.center_y) / cameraIntrinsic.focal_y;
-  float angle_y = (pix_y-cameraIntrinsic.center_x) / cameraIntrinsic.focal_x;
-  float dist = gateSize * (cameraIntrinsic.focal_x / size);
-  //cpxPrintToConsole(LOG_TO_CRTP, "angle_x = %f, angle_y = %f, dist = %f\n", angle_x, angle_y, dist);
-  //Allocation not working for some reason
-  drone_pos[0] = -dist;
-  drone_pos[1] = -angle_x * dist;
-  drone_pos[2] = -angle_y * dist;
-}
-
 
 void camera_task(void *parameters)
 {
@@ -330,7 +297,7 @@ void camera_task(void *parameters)
   }
   cpxPrintToConsole(LOG_TO_CRTP, "[UART] Open\n");
 
-  Output_1 = (NETWORK_OUT_TYPE *)pmsis_l2_malloc(12 * sizeof(NETWORK_OUT_TYPE));
+  Output_1 = (NETWORK_OUT_TYPE *)pmsis_l2_malloc(3 * sizeof(NETWORK_OUT_TYPE));
   if (Output_1 == NULL)
   {
     cpxPrintToConsole(LOG_TO_CRTP, "Failed to allocate memory for output\n");
@@ -405,11 +372,9 @@ void camera_task(void *parameters)
     pi_cluster_send_task_to_cl(&cluster_dev, task);
     inferenceTime = xTaskGetTickCount() - start;
 
-    start = xTaskGetTickCount();
-    relativePostition();
-    positionTime = xTaskGetTickCount() - start;
     
-    //cpxPrintToConsole(LOG_TO_CRTP,"Corner1: %d,%d Corner2: %d,%d Corner3: %d,%d Corner4: %d,%d \n", Output_1[0], Output_1[1],  Output_1[2], Output_1[3], Output_1[4], Output_1[5], Output_1[6], Output_1[7]);
+    cpxPrintToConsole(LOG_TO_CRTP,"out0: %d, out1: %d, out2: %d\n", Output_1[0], Output_1[1],  Output_1[2]);
+    
     //print all time
     //cpxPrintToConsole(LOG_TO_CRTP,"Inferece Time: %d, Capture Time: %d, Resize Time: %d, Postion Time: %d\n", inferenceTime, captureTime, resizeTime, positionTime);
 #ifdef USE_STREAMER
