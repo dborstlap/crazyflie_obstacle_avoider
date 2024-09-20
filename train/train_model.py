@@ -26,7 +26,7 @@ from models.model_brightness_determinator import model_brightness
 import tensorflow_model_optimization as tfmot
 
 
-NAME = "classification_brightness"
+NAME = "classification_brightness_model5"
 MODEL_NAME = NAME + ".tflite"
 MODEL_NAME_QUANT = NAME + "_q.tflite"
 
@@ -39,10 +39,10 @@ image_height = 244
 number_of_labels = 2
 batch_size = 50
 
-epochs = 200
+epochs = 10
 
 # define model
-model = model
+model = model5
 
 # model = tfmot.quantization.keras.quantize_model(model)
 
@@ -60,7 +60,7 @@ data_train, data_test, labels_train, labels_test = train_test_split(data, labels
 
 
 # model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mean_absolute_error'])
-# model.compile(optimizer=tf.keras.optimizers.Adam(1e-5), loss='categorical_crossentropy', metrics=["accuracy"])
+# model.compile(optimizer=tf.keras.optimizers.Adam(1e-6), loss='categorical_crossentropy', metrics=["accuracy"])
 model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=["accuracy"])
 
 model.summary()
@@ -84,7 +84,7 @@ train_generator = train_datagen.flow_from_directory(
     f"{DATASET_PATH}/train",
     target_size=(image_width, image_height),
     batch_size=batch_size,
-    class_mode="raw",
+    class_mode="categorical",
     color_mode="grayscale",
 )
 
@@ -98,20 +98,20 @@ val_generator = val_datagen.flow_from_directory(
 )
 
 
-"""own generator for numerical value prediction"""
-def custom_data_generator(image_paths, labels):
-    for img_path, label in zip(image_paths, labels):
-        image = load_image(img_path)  # Your custom image loading logic
-        yield image, label
+# """own generator for numerical value prediction"""
+# def custom_data_generator(image_paths, labels):
+#     for img_path, label in zip(image_paths, labels):
+#         image = load_image(img_path)  # Your custom image loading logic
+#         yield image, label
 
-# Create a tf.data.Dataset from the custom generator
-dataset = tf.data.Dataset.from_generator(
-    lambda: custom_data_generator(image_paths, labels),
-    output_signature=(
-        tf.TensorSpec(shape=(image_height, image_width, 3), dtype=tf.float32),
-        tf.TensorSpec(shape=(num_classes,), dtype=tf.float32)
-    )
-)
+# # Create a tf.data.Dataset from the custom generator
+# dataset = tf.data.Dataset.from_generator(
+#     lambda: custom_data_generator(image_paths, labels),
+#     output_signature=(
+#         tf.TensorSpec(shape=(image_height, image_width, 3), dtype=tf.float32),
+#         tf.TensorSpec(shape=(num_classes,), dtype=tf.float32)
+#     )
+# )
 
 
 history = model.fit(

@@ -18,7 +18,8 @@ PMSIS_OS = freertos
 APP_CFLAGS += -DMODEL_QUANTIZED
 
 # load the model pre-quantized by TensorFlow
-# if set to false, will quantize using images from the /samples folder
+# if set to false, will quantize using images from he /samples folder
+
 MODEL_PREQUANTIZED = true
 
 ifeq "$(MODEL_PREQUANTIZED)" "true"
@@ -27,7 +28,6 @@ ifeq "$(MODEL_PREQUANTIZED)" "true"
 else
   NNTOOL_SCRIPT=model/nntool_script_q
 endif
-
 QUANT_BITS=8
 BUILD_DIR=BUILD
 MODEL_SQ8=1
@@ -37,7 +37,7 @@ $(info Building GAP8 mode with $(QUANT_BITS) bit quantization)
 MODEL_SUFFIX = _SQ8BIT
 
 include model_decl.mk
-TRAINED_MODEL= model/model1_quantized.tflite
+TRAINED_MODEL= model/gatenetBayer/quant/gatenet_60x40_quant.tflite
 
 CLUSTER_STACK_SIZE?=6096
 CLUSTER_SLAVE_STACK_SIZE?=1024
