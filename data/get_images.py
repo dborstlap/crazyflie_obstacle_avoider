@@ -54,9 +54,11 @@ start = time.time()
 count = 0
 
 while(1):
+    print('hello')
     # First get the info
     packetInfoRaw = rx_bytes(4)
     #print(packetInfoRaw)
+    print('a;djkf')
     [length, routing, function] = struct.unpack('<HBB', packetInfoRaw)
     #print("Length is {}".format(length))
     #print("Route is 0x{:02X}->0x{:02X}".format(routing & 0xF, routing >> 4))
@@ -65,8 +67,10 @@ while(1):
     imgHeader = rx_bytes(length - 2)
     #print(imgHeader)
     #print("Length of data is {}".format(len(imgHeader)))
+    print('helloqq')
     [magic, width, height, depth, format, size] = struct.unpack('<BHHBBI', imgHeader)
 
+    print('hello1')
     if magic == 0xBC:
       #print("Magic is good")
       #print("Resolution is {}x{} with depth of {} byte(s)".format(width, height, depth))
@@ -76,13 +80,15 @@ while(1):
       # Now we start rx the image, this will be split up in packages of some size
       imgStream = bytearray()
 
+      print('hello2')
       while len(imgStream) < size:
           packetInfoRaw = rx_bytes(4)
           [length, dst, src] = struct.unpack('<HBB', packetInfoRaw)
           #print("Chunk size is {} ({:02X}->{:02X})".format(length, src, dst))
           chunk = rx_bytes(length - 2)
           imgStream.extend(chunk)
-     
+      print('hello3')
+
       count = count + 1
       meanTimePerImage = (time.time()-start) / count
       print("{}".format(meanTimePerImage))

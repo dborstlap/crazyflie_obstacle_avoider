@@ -287,7 +287,7 @@ if __name__ == '__main__':
     SAVE_FOLDER = 'cyberzoo_set4'
 
     # determine if you want to fly drone and control with arrows
-    fly_fpv = True
+    fly_fpv = False #does not work yet
 
 
     appQt = QtWidgets.QApplication(sys.argv)

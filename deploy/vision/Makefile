@@ -37,7 +37,7 @@ $(info Building GAP8 mode with $(QUANT_BITS) bit quantization)
 MODEL_SUFFIX = _SQ8BIT
 
 include model_decl.mk
-TRAINED_MODEL= model/gatenetBayer/quant/gatenet_60x40_quant.tflite
+TRAINED_MODEL= model/my_gatenet_quant.tflite
 
 CLUSTER_STACK_SIZE?=6096
 CLUSTER_SLAVE_STACK_SIZE?=1024
