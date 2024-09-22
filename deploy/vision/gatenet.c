@@ -396,9 +396,8 @@ void camera_task(void *parameters)
 
     }
 #endif
-  cpxPrintToConsole(LOG_TO_CRTP,"Drone Position: %f,%f,%f\n", drone_pos[0], drone_pos[1], drone_pos[2]);  
-  txpCrazyfly.dataLength = sizeof(drone_pos);
-  memcpy(txpCrazyfly.data,drone_pos,sizeof(drone_pos));
+  txpCrazyfly.dataLength = 3 * sizeof(NETWORK_OUT_TYPE);
+  memcpy(txpCrazyfly.data, Output_1, txpCrazyfly.dataLength);
   cpxSendPacketBlocking(&txpCrazyfly);
 
   }
