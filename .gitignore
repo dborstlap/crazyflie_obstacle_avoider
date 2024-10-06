@@ -11,8 +11,8 @@ __pycache__/
 **/.vscode/
 
 # Ignore everything in the datasets folder
-data/datasets/*
 data/images/*
+data/*
 
 
 
