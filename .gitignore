@@ -14,7 +14,9 @@ __pycache__/
 data/images/*
 data/*
 
-
+# Ignore everything in the log folder
+log/
+**/log/
 
 
 
