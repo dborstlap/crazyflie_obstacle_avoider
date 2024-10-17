@@ -18,6 +18,8 @@ data/training_data/*
 log/
 **/log/
 
+# Ignore everything in the old code directory
+old_code/
 
 
 
