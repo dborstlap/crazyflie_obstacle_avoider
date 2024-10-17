@@ -1,139 +1,249 @@
-"""
-Fly crazyflie using arrow keys. Yaw and go up-down using using A, D, W, S keys respecitvely.
 
-"""
-
-
-
-# imports
+import logging
+import struct
 import sys
 import threading
+
 import numpy as np
-import logging
+
+import cflib.crtp
+from cflib.cpx import CPXFunction
 from cflib.crazyflie import Crazyflie
-from cflib.utils import uri_helper
-from cflib.crtp import init_drivers
 from cflib.crazyflie.log import LogConfig
-from PyQt5 import QtCore, QtWidgets
+from cflib.utils import uri_helper
 
-# Standard wifi URI to connect to the Crazyflie
+try:
+    from sip import setapi
+    setapi('QVariant', 2)
+    setapi('QString', 2)
+except ImportError:
+    pass
+
+from PyQt5 import QtCore, QtWidgets, QtGui
+
+logging.basicConfig(level=logging.INFO)
+
+# If you have set a CFLIB_URI environment variable, that address will be used.
 URI = uri_helper.uri_from_env(default='tcp://192.168.4.1:5000')
-SPEED_FACTOR = 1.5
 
-class FlyCrazyflie(QtWidgets.QWidget):
+# 192.168.4.1 is the default IP address if the aideck is Access point.
+# If you are using the aideck as a station, you should use the assigned IP address
+# 5000 is the default port for the aideck
+
+CAM_HEIGHT = 244
+CAM_WIDTH = 324
+# Set the speed factor for moving and rotating
+SPEED_FACTOR = 0.8
+
+if len(sys.argv) > 1:
+    URI = sys.argv[1]
+
+
+class ImageDownloader(threading.Thread):
+    def __init__(self, cpx, cb):
+        threading.Thread.__init__(self)
+        self.daemon = True
+        self._cpx = cpx
+        self._cb = cb
+
+    def run(self):
+        while True:
+            p = self._cpx.receivePacket(CPXFunction.APP)
+            [magic, width, height, depth, format, size] = struct.unpack('<BHHBBI', p.data[0:11])
+            if (magic == 0xBC):
+                imgStream = bytearray()
+                while len(imgStream) < size:
+                    p = self._cpx.receivePacket(CPXFunction.APP)
+                    imgStream.extend(p.data)
+
+                bayer_img = np.frombuffer(imgStream, dtype=np.uint8)
+                self._cb(bayer_img) # callback to update the image
+
+
+class MainWindow(QtWidgets.QWidget):
+
     def __init__(self, URI):
-        super().__init__()
+        QtWidgets.QWidget.__init__(self)
 
-        self.setWindowTitle('Crazyflie FPV Control')
+        self.setWindowTitle('Crazyflie / AI deck FPV demo')
+
         self.mainLayout = QtWidgets.QVBoxLayout()
-        self.setLayout(self.mainLayout)
+
+        self.image_frame = QtWidgets.QLabel()
+        self.mainLayout.addWidget(self.image_frame)
+
+        self.gridLayout = QtWidgets.QGridLayout()
+        self.gridLayout.addWidget(QtWidgets.QLabel('Position (X/Y/Z)'), 0, 0, 1, 1, QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.gridLayout.addWidget(QtWidgets.QLabel('Pose (roll/pitch/yaw)'), 1,
+                                  0, 1, 1, QtCore.Qt.AlignmentFlag.AlignLeft)
 
         self.labels = {
-            'stateEstimate.x': QtWidgets.QLabel('X: 0'),
-            'stateEstimate.y': QtWidgets.QLabel('Y: 0'),
-            'stateEstimate.z': QtWidgets.QLabel('Z: 0'),
-            'stabilizer.roll': QtWidgets.QLabel('roll: 0'),
-            'stabilizer.pitch': QtWidgets.QLabel('pitch: 0'),
-            'stabilizer.yaw': QtWidgets.QLabel('yaw: 0')
+            'stateEstimate.x': {
+                'widget': QtWidgets.QLabel('X'),
+                'x_grid': 0, 'y_grid': 1,
+                'alignment': QtCore.Qt.AlignmentFlag.AlignLeft
+            },
+            'stateEstimate.y': {
+                'widget': QtWidgets.QLabel('Y'),
+                'x_grid': 0, 'y_grid': 2,
+                'alignment': QtCore.Qt.AlignmentFlag.AlignLeft
+            },
+            'stateEstimate.z': {
+                'widget': QtWidgets.QLabel('Z'),
+                'x_grid': 0, 'y_grid': 3,
+                'alignment': QtCore.Qt.AlignmentFlag.AlignLeft
+            },
+            'stabilizer.roll': {
+                'widget': QtWidgets.QLabel('roll'),
+                'x_grid': 1, 'y_grid': 1,
+                'alignment': QtCore.Qt.AlignmentFlag.AlignLeft
+            },
+            'stabilizer.pitch': {
+                'widget': QtWidgets.QLabel('pitch'),
+                'x_grid': 1, 'y_grid': 2,
+                'alignment': QtCore.Qt.AlignmentFlag.AlignLeft
+            },
+            'stabilizer.yaw': {
+                'widget': QtWidgets.QLabel('yaw'),
+                'x_grid': 1, 'y_grid': 3,
+                'alignment': QtCore.Qt.AlignmentFlag.AlignLeft
+            }
         }
 
-        for label in self.labels.values():
-            self.mainLayout.addWidget(label)
+        for name in self.labels:
+            w = self.labels[name]
+            self.gridLayout.addWidget(w['widget'], w['x_grid'], w['y_grid'], 1, 1, w['alignment'])
 
-        init_drivers()
+        self.mainLayout.addLayout(self.gridLayout)
+
+        self.setLayout(self.mainLayout)
+
+        cflib.crtp.init_drivers()
         self.cf = Crazyflie(ro_cache=None, rw_cache='cache')
 
+        # Connect callbacks from the Crazyflie API
         self.cf.connected.add_callback(self.connected)
         self.cf.disconnected.add_callback(self.disconnected)
 
+        # Connect to the Crazyflie
         self.cf.open_link(URI)
+
         if not self.cf.link:
             print('Could not connect to Crazyflie')
             sys.exit(1)
 
-        self.hover = {'x': 0.0, 'y': 0.0, 'z': 0.0, 'yaw': 0.0, 'height': 0.5}
+        if not hasattr(self.cf.link, 'cpx'):
+            print('Not connecting with WiFi')
+            self.cf.close_link()
+        else:
+            self._imgDownload = ImageDownloader(self.cf.link.cpx, self.updateImage)
+            self._imgDownload.start()
 
-        self.hoverTimer = QtCore.QTimer()
-        self.hoverTimer.timeout.connect(self.sendHoverCommand)
-        self.hoverTimer.setInterval(100)
-        self.hoverTimer.start()
+            self.hover = {'x': 0.0, 'y': 0.0, 'z': 0.0, 'yaw': 0.0, 'height': 0.3}
 
-    # Move the Crazyflie when arrow keys are pressed
+            self.hoverTimer = QtCore.QTimer()
+            self.hoverTimer.timeout.connect(self.sendHoverCommand)
+            self.hoverTimer.setInterval(100)
+            self.hoverTimer.start()
+
+    def updateImage(self, image):
+        i = QtGui.QImage(image, CAM_WIDTH, CAM_HEIGHT, QtGui.QImage.Format_Grayscale8).scaled(324*2, 244*2)
+        self.image_frame.setPixmap(QtGui.QPixmap.fromImage(i))
+
     def keyPressEvent(self, event):
-        if not event.isAutoRepeat():
-            if event.key() == QtCore.Qt.Key_Up:
-                self.hover['x'] = 1 * SPEED_FACTOR
-            if event.key() == QtCore.Qt.Key_Down:
-                self.hover['x'] = -1 * SPEED_FACTOR
-            if event.key() == QtCore.Qt.Key_Left:
-                self.hover['y'] = 1 * SPEED_FACTOR
-            if event.key() == QtCore.Qt.Key_Right:
-                self.hover['y'] = -1 * SPEED_FACTOR
-            if event.key() == QtCore.Qt.Key_A:
-                self.hover['yaw'] = 100 * SPEED_FACTOR
-            if event.key() == QtCore.Qt.Key_D:
-                self.hover['yaw'] = -100 * SPEED_FACTOR
-            if event.key() == QtCore.Qt.Key_W:
-                self.hover['height'] += 0.1
-            if event.key() == QtCore.Qt.Key_S:
-                self.hover['height'] += -0.1
+        if (not event.isAutoRepeat()):
+            if (event.key() == QtCore.Qt.Key.Key_Left):
+                self.updateHover('y', 1)
+            if (event.key() == QtCore.Qt.Key.Key_Right):
+                self.updateHover('y', -1)
+            if (event.key() == QtCore.Qt.Key.Key_Up):
+                self.updateHover('x', 1)
+            if (event.key() == QtCore.Qt.Key.Key_Down):
+                self.updateHover('x', -1)
+            if (event.key() == QtCore.Qt.Key.Key_A):
+                self.updateHover('yaw', -70)
+            if (event.key() == QtCore.Qt.Key.Key_D):
+                self.updateHover('yaw', 70)
+            if (event.key() == QtCore.Qt.Key.Key_Z):
+                self.updateHover('yaw', -200)
+            if (event.key() == QtCore.Qt.Key.Key_X):
+                self.updateHover('yaw', 200)
+            if (event.key() == QtCore.Qt.Key.Key_W):
+                self.updateHover('height', 0.1)
+            if (event.key() == QtCore.Qt.Key.Key_S):
+                self.updateHover('height', -0.1)
 
-    # Stop moving when key is released
     def keyReleaseEvent(self, event):
-        if not event.isAutoRepeat():
-            if event.key() == QtCore.Qt.Key_Up or event.key() == QtCore.Qt.Key_Down:
-                self.hover['x'] = 0
-            if event.key() == QtCore.Qt.Key_Left or event.key() == QtCore.Qt.Key_Right:
-                self.hover['y'] = 0
-            if event.key() == QtCore.Qt.Key_A or event.key() == QtCore.Qt.Key_D:
-                self.hover['yaw'] = 0
-            if event.key() == QtCore.Qt.Key_W or event.key() == QtCore.Qt.Key_S:
-                self.hover['height'] += 0
+        if (not event.isAutoRepeat()):
+            if (event.key() == QtCore.Qt.Key.Key_Left):
+                self.updateHover('y', 0)
+            if (event.key() == QtCore.Qt.Key.Key_Right):
+                self.updateHover('y', 0)
+            if (event.key() == QtCore.Qt.Key.Key_Up):
+                self.updateHover('x', 0)
+            if (event.key() == QtCore.Qt.Key.Key_Down):
+                self.updateHover('x', 0)
+            if (event.key() == QtCore.Qt.Key.Key_A):
+                self.updateHover('yaw', 0)
+            if (event.key() == QtCore.Qt.Key.Key_D):
+                self.updateHover('yaw', 0)
+            if (event.key() == QtCore.Qt.Key.Key_W):
+                self.updateHover('height', 0)
+            if (event.key() == QtCore.Qt.Key.Key_S):
+                self.updateHover('height', 0)
+            if (event.key() == QtCore.Qt.Key.Key_Z):
+                self.updateHover('yaw', 0)
+            if (event.key() == QtCore.Qt.Key.Key_X):
+                self.updateHover('yaw', 0)
 
-    # send high level control commands to the Crazyflie
     def sendHoverCommand(self):
         self.cf.commander.send_hover_setpoint(
-            self.hover['x'], 
-            self.hover['y'], 
-            self.hover['yaw'], 
+            self.hover['x'], self.hover['y'], self.hover['yaw'],
             self.hover['height'])
 
-    # When crazyflie connects, it runs this callback function
-    def connected(self, URI):
-        print(f'Connected to {URI}')
+    def updateHover(self, k, v):
+        if (k != 'height'):
+            self.hover[k] = v * SPEED_FACTOR
+        else:
+            self.hover[k] += v
 
-        # defines logs to save
-        log_config = LogConfig(name='Position', period_in_ms=100)
-        log_config.add_variable('stateEstimate.x')
-        log_config.add_variable('stateEstimate.y')
-        log_config.add_variable('stateEstimate.z')
-        log_config.add_variable('stabilizer.roll')
-        log_config.add_variable('stabilizer.pitch')
-        log_config.add_variable('stabilizer.yaw')
-        try:
-            self.cf.log.add_config(log_config)
-            log_config.data_received_cb.add_callback(self.update_labels)
-            log_config.start()
-        except KeyError as e:
-            print(f'Could not start log config: {str(e)}')
-
-    # when crazyflie disconnects, it runs this callback function
     def disconnected(self, URI):
-        print(f'Disconnected from {URI}')
+        print('Disconnected')
         sys.exit(1)
 
-    # update the labels of the GUI
-    def update_labels(self, timestamp, data, logconf):
-        for key, value in data.items():
-            self.labels[key].setText(f'{key}: {value:.2f}')
+    def connected(self, URI):
+        print('We are now connected to {}'.format(URI))
 
-    # close the link when the window is closed
+        # The definition of the logconfig can be made before connecting
+        lp = LogConfig(name='Position', period_in_ms=100)
+        lp.add_variable('stateEstimate.x')
+        lp.add_variable('stateEstimate.y')
+        lp.add_variable('stateEstimate.z')
+        lp.add_variable('stabilizer.roll')
+        lp.add_variable('stabilizer.pitch')
+        lp.add_variable('stabilizer.yaw')
+
+        try:
+            self.cf.log.add_config(lp)
+            lp.data_received_cb.add_callback(self.pos_data)
+            lp.start()
+        except KeyError as e:
+            print('Could not start log configuration,'
+                  '{} not found in TOC'.format(str(e)))
+        except AttributeError:
+            print('Could not add Position log config, bad configuration.')
+
+    def pos_data(self, timestamp, data, logconf):
+        for name in data:
+            self.labels[name]['widget'].setText('{:.02f}'.format(data[name]))
+
     def closeEvent(self, event):
-        if self.cf is not None:
+        if (self.cf is not None):
             self.cf.close_link()
 
+
 if __name__ == '__main__':
-    app = QtWidgets.QApplication(sys.argv)
-    win = FlyCrazyflie(URI)
+    appQt = QtWidgets.QApplication(sys.argv)
+    win = MainWindow(URI)
     win.show()
-    sys.exit(app.exec_())
+    appQt.exec()

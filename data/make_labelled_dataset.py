@@ -1,72 +1,110 @@
 import os
+import sys
 import pandas as pd
 import numpy as np
 import tensorflow as tf
-import cv2
+sys.path.append(os.getcwd())
 
-def label_func(filename):
+def load_image(filename, input_shape=(120, 180, 1)):
+    """
+    Load an image from a file and resize it to the required dimensions.
 
+    Args:
+        filename (str): Path to the image file.
+
+    Returns:
+        np.array: Image data.
+    """
     image_file = tf.io.read_file(filename)
-    image = tf.io.decode_png(image_file, channels = 1)
-    # image = tf.image.resize(image, input_shape[:2])
+    image = tf.io.decode_png(image_file, channels=1)
+    # image = tf.image.resize(image, input_shape)
     image = tf.cast(image, tf.float32).numpy()
+    return image
 
-    left_side = image[:, :image.shape[1]//2]
-    right_side = image[:, image.shape[1]//2:]
+def example_label_func(image):
+    """
+    Computes brightness labels for the whole image, the left side, and the right side.
 
-    brightness = image.mean()
-    brightness_left = left_side.mean()
-    brightness_right = right_side.mean()
+    Args:
+        image (np.array): Image data array
 
-    return np.array([brightness, brightness_left, brightness_right], dtype=np.float32)
+    Returns:
+        np.array: Array containing brightness values for the full image, left half, and right half.
+    """
+
+    # Split image into left and right halves
+    mid_point = image.shape[1] // 2
+    left_side = image[:, :mid_point]
+    right_side = image[:, mid_point:]
+
+    # Compute mean brightness for full image, left, and right halves
+    average_brightness = image.mean()
+    average_brightness_left = left_side.mean()
+    average_brightness_right = right_side.mean()
+
+    return np.array([average_brightness, average_brightness_left, average_brightness_right], dtype=np.float32)
 
 
-
-
-def make_labeled_dataset(image_files, output_csv, label_func=None):
+def make_labeled_dataset(image_dir, output_csv, label_func=None):
     """
     Creates a CSV file with image file paths and corresponding labels.
-    
+
     Args:
-        image_files (list): List of image file paths.
+        image_dir (str): Directory with all training data.
         output_csv (str): Path to the output CSV file.
-        label_func (callable, optional): Function to generate labels from file names. If None, labels default to 0.
-    
+        label_func (callable, optional): Function to generate labels from image.
+        base_dir (str, optional): Base directory to compute relative paths.
+
     Returns:
         None
     """
-    # List to store file paths and labels
-    data = []
-    
-    # Loop through image files
-    for image_file in image_files:
-        # use label_func to get the label
-        label = label_func(image_file)
+
+    image_file_names = []
+    for root, _, files in os.walk(image_dir):
+        for file in files:
+            if file.endswith('.png'):
+                image_file_names.append(os.path.join(root, file))
+
+    data = []  # List to store file paths and labels
+
+    # Loop through each image file and compute the label
+    for image_file in image_file_names:
+
+        # Load the image
+        image = load_image(image_file)
+
+        # Use label_func to generate labels
+        label = label_func(image)
+
+        # Compute filename relative to base_dir
+        relative_filename = os.path.relpath(image_file, start=image_dir)
+
+        # Append the data: filename and labels
+        # Create a dictionary to store the filename and labels
+        data_entry = {'filename': relative_filename}
         
-        # Append the data
-        data.append({'filename': os.path.basename(image_file), 'label1': label[0], 'label2': label[1], 'label3': label[2]})
-    
-    # Convert to a DataFrame
+        # Add each label to the dictionary
+        for i, label_i in enumerate(label):
+            data_entry['label_' + str(i)] = label_i
+        
+        # Append the dictionary to the data list
+        data.append(data_entry)
+
+    # Convert list to a DataFrame and save as CSV
     df = pd.DataFrame(data)
-    
-    # Save the DataFrame to CSV
     df.to_csv(output_csv, index=False)
     print(f"CSV file saved to {output_csv}")
 
-# Example usage
-image_dir = 'images/all_data'
-image_dir = os.path.join(os.path.dirname(__file__), image_dir)
-image_file_names = [os.path.join(image_dir, file) for file in os.listdir(image_dir) if file.endswith('.png')]
 
-# Create CSV output
-make_labeled_dataset(image_file_names, 'output_labels.csv', label_func=label_func)
+if __name__ == '__main__':
+    # Define the image directory and CSV output path
+    image_dir = 'data/training_data/images'
 
+    # Create the CSV file with image labels
+    make_labeled_dataset(
+        image_dir = image_dir,
+        output_csv = 'data/training_data/labels/example_labels.csv',
+        label_func = example_label_func,
+    )
 
-
-
-
-
-
-
-
-
+    print("Done!")

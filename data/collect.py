@@ -1,16 +1,17 @@
-import argparse
+"""
+Needs orginal firmware (can be loaded from the Crazyflie client)
+
+"""
+# imports
 import socket
 import struct
 import os
 import datetime
 import numpy as np
 import cv2
-import threading
 import time
-from PyQt5 import QtCore, QtWidgets
 from cflib.utils import uri_helper
-from cflib.crazyflie.log import LogConfig
-from fly_fpv import MainWindow  # Importing the FPV flying functionality
+# from fly_fpv import MainWindow  # Importing the FPV flying functionality
 
 # Constants for image processing
 CAM_HEIGHT = 244
@@ -45,7 +46,7 @@ def collect_images(client_socket, save_folder):
     start_time = time.time()
     
     while True:
-        input("Press Enter to capture an image...")
+        input("Press Enter to capture an image:  ")
         
         # Receive packet info and image header
         packet_info = rx_bytes(client_socket, 4)
@@ -80,26 +81,12 @@ def collect_images(client_socket, save_folder):
             print(f"Captured image {count}. Avg time per image: {elapsed_time / count:.2f} seconds")
 
 
-# Function to run the FPV flying from 'fly_fpv.py'
-def start_fpv_flying():
-    app = QtWidgets.QApplication([])
-    window = MainWindow(URI)
-    window.show()
-    app.exec_()
-
 if __name__ == '__main__':
     # Define what you want to do
-    FLY = False
-    SAVE_FOLDER = "training_datat/raw/my_test_images"
+    SAVE_FOLDER = "data/training_data/raw/my_test_images"
 
     # Connect to the drone via WiFi
     client_socket = connect_to_drone()
-
-    # If fly mode is enabled, start the FPV GUI in a separate thread
-    if FLY:
-        print("Starting FPV mode...")
-        fpv_thread = threading.Thread(target=start_fpv_flying)
-        fpv_thread.start()
 
     # Collect images on Enter press
     collect_images(client_socket, SAVE_FOLDER)
